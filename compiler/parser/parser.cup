@@ -1,0 +1,120 @@
+package parser;
+
+import java_cup.runtime.Symbol;
+import scanner.Scanner;
+
+parser code {:
+    private Scanner scanner;
+
+    // Constructor para inicializar el scanner
+    public Parser(Scanner scanner) {
+        super();
+        this.scanner = scanner;
+    }
+
+    // Método para leer un archivo de entrada y ejecutar el parser
+    public Symbol parse(String filename) throws Exception {
+        try {
+            scanner = new Scanner(new FileReader(filename));
+            return this.parse();
+        } catch (IOException e) {
+            throw new RuntimeException("Error al leer el archivo: " + e.getMessage());
+        }
+    }
+
+    // Método scan que conecta el scanner al parser
+    @Override
+    public Symbol scan() throws Exception {
+        return scanner.next_token();
+    }
+
+    // Método para manejar errores de sintaxis
+    public void syntax_error(Symbol s) {
+        String tokenName = sym.terminalNames[s.sym];
+        String tokenValue = s.value == null ? "" : s.value.toString();
+        String errorMessage = String.format(
+            "Error Sintáctico en la Línea %d, Columna %d: Token '%s' no reconocido. Tipo: %s",
+            s.right + 1, s.left + 1, tokenValue, tokenName
+        );
+
+        // Imprimir el error en la consola
+        System.err.println(errorMessage);
+    }
+
+    // Método para manejar errores semánticos
+    public void semantic_error(String message) {
+        System.err.println("Error Semántico: " + message);
+    }
+:};
+
+/* Terminals (tokens returned by the scanner) */
+terminal PLUS, MINUS, MULTIPLY, DIVIDE;
+terminal EQUALS, EQUALS_EQUALS, NOT_EQUALS, LESS_THAN, LESS_THAN_EQUALS, GREATER_THAN, GREATER_THAN_EQUALS;
+terminal LPAREN, RPAREN, LBRACE, RBRACE, SEMICOLON, COMMA;
+terminal IF, ELSE, WHILE, FOR, INT, FLOAT, BOOLEAN, RETURN, TRUE, FALSE, PUBLIC, VOID, CLASS;
+terminal IDENTIFIER, INTLIT, FLOATLIT, STRINGLIT;
+
+/* Non-terminals */
+non terminal Object Program, StatementList, Statement, Expression, Type, VariableDeclaration;
+
+/* Precedences */
+precedence left PLUS, MINUS;
+precedence left MULTIPLY, DIVIDE;
+precedence left EQUALS_EQUALS, NOT_EQUALS, LESS_THAN, LESS_THAN_EQUALS, GREATER_THAN, GREATER_THAN_EQUALS;
+precedence nonassoc ELSE;  // Evitar conflicto con "else"
+
+/* The grammar rules */
+start with Program;
+
+Program ::= CLASS IDENTIFIER LBRACE StatementList RBRACE
+          {: 
+              System.out.println("Parsed Program"); 
+          :}
+          | 
+          { semantic_error("El programa debe comenzar con la declaración de 'class Program'."); 
+            throw new RuntimeException("Error Semántico: El programa no comienza con 'class Program'."); 
+          }
+          ;
+
+StatementList ::= Statement
+                | StatementList Statement
+                ;
+
+Statement ::= IF LPAREN Expression RPAREN Statement
+            | IF LPAREN Expression RPAREN Statement ELSE Statement
+            | WHILE LPAREN Expression RPAREN Statement
+            | FOR LPAREN Expression SEMICOLON Expression SEMICOLON Expression RPAREN Statement
+            | VariableDeclaration
+            | IDENTIFIER EQUALS Expression SEMICOLON
+            | RETURN Expression SEMICOLON
+            | LBRACE StatementList RBRACE
+            ;
+
+VariableDeclaration ::= Type IDENTIFIER SEMICOLON
+                      | Type IDENTIFIER EQUALS Expression SEMICOLON
+                      ;
+
+Expression ::= Expression PLUS Expression
+             | Expression MINUS Expression
+             | Expression MULTIPLY Expression
+             | Expression DIVIDE Expression
+             | Expression EQUALS_EQUALS Expression
+             | Expression NOT_EQUALS Expression
+             | Expression LESS_THAN Expression
+             | Expression LESS_THAN_EQUALS Expression
+             | Expression GREATER_THAN Expression
+             | Expression GREATER_THAN_EQUALS Expression
+             | LPAREN Expression RPAREN
+             | IDENTIFIER
+             | INTLIT
+             | FLOATLIT
+             | STRINGLIT
+             | TRUE
+             | FALSE
+             ;
+
+Type ::= INT
+       | FLOAT
+       | BOOLEAN
+       | VOID
+       ;
