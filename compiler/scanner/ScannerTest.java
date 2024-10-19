@@ -38,40 +38,53 @@ public class ScannerTest {
     }
 
     // Función auxiliar para obtener el nombre del token a partir de su valor en sym.java
-    public static String getTokenName(int symValue) {
-        switch (symValue) {
-            case sym.IF: return "IF";
-            case sym.ELSE: return "ELSE";
-            case sym.WHILE: return "WHILE";
-            case sym.INT: return "INT";
-            case sym.FLOAT: return "FLOAT";
-            case sym.TRUE: return "TRUE";
-            case sym.FALSE: return "FALSE";
-            case sym.VOID: return "VOID";
-            case sym.RETURN: return "RETURN";
-            case sym.EQUALS: return "EQUALS";
-            case sym.EQUALS_EQUALS: return "EQUALS_EQUALS";
-            case sym.NOT_EQUALS: return "NOT_EQUALS";
-            case sym.LESS_THAN: return "LESS_THAN";
-            case sym.LESS_THAN_EQUALS: return "LESS_THAN_EQUALS";
-            case sym.GREATER_THAN: return "GREATER_THAN";
-            case sym.GREATER_THAN_EQUALS: return "GREATER_THAN_EQUALS";
-            case sym.LPAREN: return "LPAREN";
-            case sym.RPAREN: return "RPAREN";
-            case sym.LBRACE: return "LBRACE";
-            case sym.RBRACE: return "RBRACE";
-            case sym.SEMICOLON: return "SEMICOLON";
-            case sym.COMMA: return "COMMA";
-            case sym.PLUS: return "PLUS";
-            case sym.MINUS: return "MINUS";
-            case sym.MULTIPLY: return "MULTIPLY";
-            case sym.DIVIDE: return "DIVIDE";
-            case sym.INTLIT: return "INTLIT";
-            case sym.FLOATLIT: return "FLOATLIT";
-            case sym.IDENTIFIER: return "IDENTIFIER";
-            case sym.STRINGLIT: return "STRINGLIT";
-            case sym.error: return "ERROR";
-            default: return "UNKNOWN";
-        }
+    // Función auxiliar para obtener el nombre del token a partir de su valor en sym.java
+public static String getTokenName(int symValue) {
+    switch (symValue) {
+        case sym.IF: return "IF";
+        case sym.ELSE: return "ELSE";
+        case sym.INT: return "INT";
+        case sym.TRUE: return "TRUE";
+        case sym.FALSE: return "FALSE";
+        case sym.VOID: return "VOID";
+        case sym.RETURN: return "RETURN";
+        case sym.ASSIGN: return "ASSIGN";
+        case sym.EQUALS_EQUALS: return "EQUALS_EQUALS";
+        case sym.NOT_EQUALS: return "NOT_EQUALS";
+        case sym.LESS_THAN: return "LESS_THAN";
+        case sym.LESS_THAN_EQUALS: return "LESS_THAN_EQUALS";
+        case sym.GREATHER_THAN: return "GREATHER_THAN";
+        case sym.GREATHER_THAN_EQUALS: return "GREATHER_THAN_EQUALS";
+        case sym.LPAREN: return "LPAREN";
+        case sym.RPAREN: return "RPAREN";
+        case sym.LBRACE: return "LBRACE";
+        case sym.RBRACE: return "RBRACE";
+        case sym.SEMI: return "SEMI";
+        case sym.COMMA: return "COMMA";
+        case sym.PLUS: return "PLUS";
+        case sym.MINUS: return "MINUS";
+        case sym.TIMES: return "TIMES";
+        case sym.DIVIDE: return "DIVIDE";
+        case sym.INT_LITERAL: return "INT_LITERAL";
+        case sym.STRING_LITERAL: return "STRING_LITERAL";
+        case sym.ID: return "ID";
+        case sym.error: return "ERROR";
+        case sym.PROGRAM: return "PROGRAM";
+        case sym.CLASS: return "CLASS";
+        case sym.BOOLEAN: return "BOOLEAN";
+        case sym.FOR: return "FOR";
+        case sym.CONTINUE: return "CONTINUE";
+        case sym.BREAK: return "BREAK";
+        case sym.AND: return "AND";
+        case sym.OR: return "OR";
+        case sym.NOT: return "NOT";
+        case sym.CALLOUT: return "CALLOUT";
+        case sym.LBRACKET: return "LBRACKET";
+        case sym.RBRACKET: return "RBRACKET";
+        case sym.CHAR_LITERAL: return "CHAR_LITERAL";
+        default: return "UNKNOWN";
     }
+}
+
+    
 }

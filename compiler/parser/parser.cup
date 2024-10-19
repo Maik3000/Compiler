@@ -1,18 +1,21 @@
 package parser;
+import scanner.Scanner;
+import parser.sym;
 
 import java_cup.runtime.Symbol;
-import scanner.Scanner;
+import java_cup.runtime.*;
+
+import java.io.FileReader;
+import java.io.IOException;
 
 parser code {:
     private Scanner scanner;
 
-    // Constructor para inicializar el scanner
     public Parser(Scanner scanner) {
         super();
         this.scanner = scanner;
     }
 
-    // Método para leer un archivo de entrada y ejecutar el parser
     public Symbol parse(String filename) throws Exception {
         try {
             scanner = new Scanner(new FileReader(filename));
@@ -22,99 +25,157 @@ parser code {:
         }
     }
 
-    // Método scan que conecta el scanner al parser
     @Override
     public Symbol scan() throws Exception {
         return scanner.next_token();
     }
 
-    // Método para manejar errores de sintaxis
     public void syntax_error(Symbol s) {
-        String tokenName = sym.terminalNames[s.sym];
-        String tokenValue = s.value == null ? "" : s.value.toString();
-        String errorMessage = String.format(
-            "Error Sintáctico en la Línea %d, Columna %d: Token '%s' no reconocido. Tipo: %s",
-            s.right + 1, s.left + 1, tokenValue, tokenName
-        );
+    String tokenName = sym.terminalNames[s.sym];
+    String tokenValue = s.value == null ? "" : s.value.toString();
+    String errorMessage = String.format(
+        "Error Sintáctico en la Línea %d, Columna %d: Token '%s' no reconocido. Tipo: %s",
+        s.left, s.right, tokenValue, tokenName
+    );
 
-        // Imprimir el error en la consola
-        System.err.println(errorMessage);
-    }
-
-    // Método para manejar errores semánticos
-    public void semantic_error(String message) {
-        System.err.println("Error Semántico: " + message);
-    }
+    System.err.println(errorMessage);
+}
 :};
 
-/* Terminals (tokens returned by the scanner) */
-terminal PLUS, MINUS, MULTIPLY, DIVIDE;
-terminal EQUALS, EQUALS_EQUALS, NOT_EQUALS, LESS_THAN, LESS_THAN_EQUALS, GREATER_THAN, GREATER_THAN_EQUALS;
-terminal LPAREN, RPAREN, LBRACE, RBRACE, SEMICOLON, COMMA;
-terminal IF, ELSE, WHILE, FOR, INT, FLOAT, BOOLEAN, RETURN, TRUE, FALSE, PUBLIC, VOID, CLASS;
-terminal IDENTIFIER, INTLIT, FLOATLIT, STRINGLIT;
+/* terminals */
+
+terminal CLASS, VOID;
+terminal IF, ELSE, FOR, RETURN, BREAK, CONTINUE;
+terminal ASSIGN;
+terminal SEMI, COMMA, LBRACKET, RBRACKET, LPAREN, RPAREN, LBRACE, RBRACE;
+terminal PLUS, MINUS, TIMES, DIVIDE;
+terminal LESS_THAN, GREATHER_THAN, LESS_THAN_EQUALS, GREATHER_THAN_EQUALS, EQUALS_EQUALS, NOT_EQUALS;
+terminal AND, OR, NOT;
+terminal CALLOUT;
+terminal INT, BOOLEAN;
+terminal TRUE, FALSE;
+terminal String ID, PROGRAM;
+terminal Integer INT_LITERAL;
+terminal Character CHAR_LITERAL;
+terminal String STRING_LITERAL;
 
 /* Non-terminals */
-non terminal Object Program, StatementList, Statement, Expression, Type, VariableDeclaration;
+non terminal program;
+non terminal field_decl_list, field_decl, field_list, field;
+non terminal method_decl_list, method_decl;
+non terminal block, var_decl_list, var_decl;
+non terminal type, statement_list, statement;
+non terminal assign_op, method_call, method_name;
+non terminal location, expr, callout_arg_list, callout_arg;
+non terminal bin_op, arith_op, rel_op, eq_op, cond_op;
+non terminal literal, bool_literal, id_list, param_list;
 
 /* Precedences */
+precedence left OR;
+precedence left AND;
+precedence left EQUALS_EQUALS, NOT_EQUALS;
+precedence left LESS_THAN, GREATHER_THAN, LESS_THAN_EQUALS, GREATHER_THAN_EQUALS;
 precedence left PLUS, MINUS;
-precedence left MULTIPLY, DIVIDE;
-precedence left EQUALS_EQUALS, NOT_EQUALS, LESS_THAN, LESS_THAN_EQUALS, GREATER_THAN, GREATER_THAN_EQUALS;
-precedence nonassoc ELSE;  // Evitar conflicto con "else"
+precedence left TIMES, DIVIDE;
+precedence left INT, BOOLEAN;
+precedence right NOT;
 
 /* The grammar rules */
-start with Program;
+start with program;
 
-Program ::= CLASS IDENTIFIER LBRACE StatementList RBRACE
-          {: 
-              System.out.println("Parsed Program"); 
-          :}
-          | 
-          { semantic_error("El programa debe comenzar con la declaración de 'class Program'."); 
-            throw new RuntimeException("Error Semántico: El programa no comienza con 'class Program'."); 
-          }
-          ;
+program ::= CLASS ID:name LBRACE field_decl_list method_decl_list RBRACE
+          | CLASS PROGRAM:name LBRACE field_decl_list method_decl_list RBRACE;
+          
 
-StatementList ::= Statement
-                | StatementList Statement
-                ;
+field_decl_list ::= field_decl_list field_decl
+                  | /* empty */;
 
-Statement ::= IF LPAREN Expression RPAREN Statement
-            | IF LPAREN Expression RPAREN Statement ELSE Statement
-            | WHILE LPAREN Expression RPAREN Statement
-            | FOR LPAREN Expression SEMICOLON Expression SEMICOLON Expression RPAREN Statement
-            | VariableDeclaration
-            | IDENTIFIER EQUALS Expression SEMICOLON
-            | RETURN Expression SEMICOLON
-            | LBRACE StatementList RBRACE
-            ;
+field_decl ::= type field_list SEMI;
 
-VariableDeclaration ::= Type IDENTIFIER SEMICOLON
-                      | Type IDENTIFIER EQUALS Expression SEMICOLON
-                      ;
+field_list ::= field_list COMMA field
+             | field;
 
-Expression ::= Expression PLUS Expression
-             | Expression MINUS Expression
-             | Expression MULTIPLY Expression
-             | Expression DIVIDE Expression
-             | Expression EQUALS_EQUALS Expression
-             | Expression NOT_EQUALS Expression
-             | Expression LESS_THAN Expression
-             | Expression LESS_THAN_EQUALS Expression
-             | Expression GREATER_THAN Expression
-             | Expression GREATER_THAN_EQUALS Expression
-             | LPAREN Expression RPAREN
-             | IDENTIFIER
-             | INTLIT
-             | FLOATLIT
-             | STRINGLIT
-             | TRUE
-             | FALSE
-             ;
+field ::= ID
+        | ID LBRACKET INT_LITERAL RBRACKET;
 
-Type ::= INT
-       | FLOAT
-       | BOOLEAN
-       | VOID
-       ;
+method_decl_list ::= method_decl_list method_decl
+                   | /* empty */;
+
+method_decl ::= type ID LPAREN param_list RPAREN block
+              | VOID ID LPAREN param_list RPAREN block;
+
+param_list ::= type ID
+             | param_list COMMA type ID
+             | /* empty */;
+
+block ::= LBRACE var_decl_list statement_list RBRACE;
+
+var_decl_list ::= var_decl_list var_decl
+                | /* empty */;
+
+var_decl ::= type id_list SEMI;
+
+id_list ::= id_list COMMA ID
+          | ID;
+
+type ::= INT
+       | BOOLEAN;
+
+statement_list ::= statement_list statement
+                 | /* empty */;
+
+statement ::= location assign_op expr SEMI
+            | method_call SEMI
+            | IF LBRACE expr RBRACE block ELSE block
+            | IF LPAREN expr RPAREN block
+            | FOR ID ASSIGN expr COMMA expr block
+            | RETURN expr SEMI
+            | RETURN SEMI
+            | BREAK SEMI
+            | CONTINUE SEMI
+            | block;
+
+assign_op ::= ASSIGN;
+
+method_call ::= method_name LPAREN RPAREN
+              | method_name LPAREN expr RPAREN
+              | method_name LPAREN expr COMMA expr RPAREN
+              | CALLOUT LPAREN STRING_LITERAL COMMA callout_arg_list RPAREN;
+
+method_name ::= ID;
+
+location ::= ID
+           | ID LBRACKET expr RBRACKET;
+
+expr ::= location
+       | method_call
+       | literal
+       | expr bin_op expr
+       | MINUS expr
+       | NOT expr
+       | LPAREN expr RPAREN;
+
+callout_arg_list ::= callout_arg_list COMMA callout_arg
+                   | callout_arg;
+
+callout_arg ::= expr
+              | STRING_LITERAL;
+
+bin_op ::= arith_op
+         | rel_op
+         | eq_op
+         | cond_op;
+
+arith_op ::= PLUS | MINUS | TIMES | DIVIDE;
+
+rel_op ::= LESS_THAN | GREATHER_THAN | LESS_THAN_EQUALS | GREATHER_THAN_EQUALS;
+
+eq_op ::= EQUALS_EQUALS | NOT_EQUALS;
+
+cond_op ::= AND | OR;
+
+literal ::= INT_LITERAL
+          | CHAR_LITERAL
+          | bool_literal;
+
+bool_literal ::= TRUE | FALSE;

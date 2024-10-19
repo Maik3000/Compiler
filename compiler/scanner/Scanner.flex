@@ -1,77 +1,108 @@
 package scanner;
 
-import java_cup.runtime.Symbol;
+import java_cup.runtime.*;
 import parser.sym;
 
 %%
 
 %public
 %class Scanner
-%unicode
 %cup
+%unicode
 %line
 %column
 
 %{
-  // Java code, if any, goes here
-  // You can include additional imports if needed
+  private Symbol symbol(int type) {
+    return new Symbol(type, yyline + 1, yycolumn + 1);
+  }
+
+  private Symbol symbol(int type, Object value) {
+    return new Symbol(type, yyline + 1, yycolumn + 1, value);
+  }
+
+  public void printToken(Symbol token) {
+    System.out.printf("(línea: %d, columna: %d, token: %s, valor: %s)\n",
+        token.left, token.right, sym.terminalNames[token.sym], token.value);
+  }
 %}
 
 %%
 
-/* Definition of tokens */
+// Palabras clave
+"class"      { return symbol(sym.CLASS, yytext()); }
+"if"         { return symbol(sym.IF, yytext()); }
+"else"       { return symbol(sym.ELSE, yytext()); }
+"for"        { return symbol(sym.FOR, yytext()); }
+"int"        { return symbol(sym.INT, yytext()); }
+"boolean"    { return symbol(sym.BOOLEAN, yytext()); }
+"true"       { return symbol(sym.TRUE, yytext()); }
+"false"      { return symbol(sym.FALSE, yytext()); }
+"void"       { return symbol(sym.VOID, yytext()); }
+"return"     { return symbol(sym.RETURN, yytext()); }
+"break"      { return symbol(sym.BREAK, yytext()); }
+"continue"   { return symbol(sym.CONTINUE, yytext()); }
+"callout"    { return symbol(sym.CALLOUT, yytext()); }
 
-// Ignore whitespace
-[ \t\r\n\f]+                      { /* skip whitespace */ }
+// Operadores Aritmeticos
+"+"          { return symbol(sym.PLUS, yytext()); }
+"-"          { return symbol(sym.MINUS, yytext()); }
+"*"          { return symbol(sym.TIMES, yytext()); }
+"/"          { return symbol(sym.DIVIDE, yytext()); }
 
-// Operators
-"+"                               { return new Symbol(sym.PLUS, yyline, yycolumn); }
-"-"                               { return new Symbol(sym.MINUS, yyline, yycolumn); }
-"*"                               { return new Symbol(sym.MULTIPLY, yyline, yycolumn); }
-"/"                               { return new Symbol(sym.DIVIDE, yyline, yycolumn); }
 
-// Comparison operators
-"=="                              { return new Symbol(sym.EQUALS_EQUALS, yyline, yycolumn); }
-"!="                              { return new Symbol(sym.NOT_EQUALS, yyline, yycolumn); }
-"<"                               { return new Symbol(sym.LESS_THAN, yyline, yycolumn); }
-"<="                              { return new Symbol(sym.LESS_THAN_EQUALS, yyline, yycolumn); }
-">"                               { return new Symbol(sym.GREATER_THAN, yyline, yycolumn); }
-">="                              { return new Symbol(sym.GREATER_THAN_EQUALS, yyline, yycolumn); }
+// Operadores de comparación
+"="          { return symbol(sym.ASSIGN, yytext()); }
+"=="         { return symbol(sym.EQUALS_EQUALS, yytext()); }
+"!="         { return symbol(sym.NOT_EQUALS, yytext()); }
+"<"          { return symbol(sym.LESS_THAN, yytext()); }
+">"          { return symbol(sym.GREATHER_THAN, yytext()); }
+"<="         { return symbol(sym.LESS_THAN_EQUALS, yytext()); }
+">="         { return symbol(sym.GREATHER_THAN_EQUALS, yytext()); }
+"&&"         { return symbol(sym.AND, yytext()); }
+"||"         { return symbol(sym.OR, yytext()); }
+"!"          { return symbol(sym.NOT, yytext()); }
 
-// Parentheses
-"("                               { return new Symbol(sym.LPAREN, yyline, yycolumn); }
-")"                               { return new Symbol(sym.RPAREN, yyline, yycolumn); }
+// Agrupaciones
+"{"          { return symbol(sym.LBRACE, yytext()); }
+"}"          { return symbol(sym.RBRACE, yytext()); }
+"("          { return symbol(sym.LPAREN, yytext()); }
+")"          { return symbol(sym.RPAREN, yytext()); }
+"["          { return symbol(sym.LBRACKET, yytext()); }
+"]"          { return symbol(sym.RBRACKET, yytext()); }
 
-// Braces
-"{"                               { return new Symbol(sym.LBRACE, yyline, yycolumn); }
-"}"                               { return new Symbol(sym.RBRACE, yyline, yycolumn); }
+// Otros símbolos
+";"          { return symbol(sym.SEMI, yytext()); }
+","          { return symbol(sym.COMMA, yytext()); }
 
-// Literals
-[0-9]+                            { return new Symbol(sym.INTLIT, yyline, yycolumn, Integer.parseInt(yytext())); }
-[0-9]+"."([0-9]+)?               { return new Symbol(sym.FLOATLIT, yyline, yycolumn, Double.parseDouble(yytext())); }
-\"([^\"]*)\"                      { return new Symbol(sym.STRINGLIT, yyline, yycolumn, yytext()); }
+// Literales numéricos
+[0-9]+       { return symbol(sym.INT_LITERAL, Integer.parseInt(yytext())); }
+0x[0-9A-Fa-f]+ { return symbol(sym.INT_LITERAL, Integer.parseInt(yytext().substring(2), 16)); }
 
-// Identifiers
-[a-zA-Z][a-zA-Z0-9_]*            { return new Symbol(sym.IDENTIFIER, yyline, yycolumn, yytext()); }
+// Literales de caracteres
+'[^'\n]'     { return symbol(sym.CHAR_LITERAL, yytext().charAt(1)); }
+'\\[ntr\\\']' { return symbol(sym.CHAR_LITERAL, yytext().charAt(1) == 'n' ? '\n' : 
+                                                   yytext().charAt(1) == 't' ? '\t' : 
+                                                   yytext().charAt(1) == 'r' ? '\r' : 
+                                                   yytext().charAt(1)); }
 
-// Keywords
-"class"                           { return new Symbol(sym.CLASS, yyline, yycolumn); }
-"Program"                         { return new Symbol(sym.PROGRAM, yyline, yycolumn); }
-"if"                              { return new Symbol(sym.IF, yyline, yycolumn); }
-"else"                            { return new Symbol(sym.ELSE, yyline, yycolumn); }
-"while"                           { return new Symbol(sym.WHILE, yyline, yycolumn); }
-"for"                             { return new Symbol(sym.FOR, yyline, yycolumn); }
-"int"                             { return new Symbol(sym.INT, yyline, yycolumn); }
-"float"                           { return new Symbol(sym.FLOAT, yyline, yycolumn); }
-"boolean"                         { return new Symbol(sym.BOOLEAN, yyline, yycolumn); }
-"true"                            { return new Symbol(sym.TRUE, yyline, yycolumn); }
-"false"                           { return new Symbol(sym.FALSE, yyline, yycolumn); }
-"void"                            { return new Symbol(sym.VOID, yyline, yycolumn); }
-"return"                          { return new Symbol(sym.RETURN, yyline, yycolumn); }
+// Literales de cadenas
+\"[^\"]*\"   { return symbol(sym.STRING_LITERAL, yytext().substring(1, yytext().length() - 1)); }
 
-// Other symbols
-";"                               { return new Symbol(sym.SEMICOLON, yyline, yycolumn); }
-","                               { return new Symbol(sym.COMMA, yyline, yycolumn); }
+// Identificadores
+"Program"    { return symbol(sym.PROGRAM, yytext()); }
+[a-zA-Z][a-zA-Z0-9_]* { return symbol(sym.ID, yytext()); }
 
-// Illegal characters
-.                                 { System.err.println("Illegal character: " + yytext()); }
+// Saltos de línea y espacios en blanco
+[ \t\r\n]+   { /* ignore whitespace */ }
+
+// Comentarios
+"//".*       { /* Ignorar comentarios de una línea */ }
+"/*"([^*]|\*+[^*/])*\*+"/" { /* Ignorar comentarios multilínea */ }
+
+// Manejo de errores
+.            { 
+    throw new RuntimeException("Caracter ilegal: '" + yytext() + "' en la línea " + (yyline + 1) + ", columna " + (yycolumn + 1));
+}
+
+<<EOF>>      { return symbol(sym.EOF); }
