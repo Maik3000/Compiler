@@ -36,9 +36,15 @@ Este proyecto es un compilador para el lenguaje de programación **Decaf**, un l
    cd tu_repositorio
 
 2. Compila el proyecto:
-   ```bash
-   javac -cp ".;lib/java-cup-11b.jar;lib/java-cup-11b-runtime.jar" parser/*.java scanner/*.java
+   
+    ```bash
+    javac -d classes -cp ".;lib/java-cup-11b-runtime.jar" -Xlint:deprecation parser/Parser.java parser/sym.java parser/ParserTest.java scanner/Scanner.java             scanner/ScannerTest.java
 
-3. Ejecuta el archivo de prueba:
+    javac -d classes -cp ".;lib/java-cup-11b-runtime.jar" Main.java scanner/Scanner.java parser/Parser.java
+
+4. Ejecuta los archivos de prueba:
    ```bash
-   java -cp ".;lib/java-cup-11b.jar;lib/java-cup-11b-runtime.jar" parser.ParserTest
+   java -cp ".;classes;lib/java-cup-11b-runtime.jar" parser.ParserTest
+   java -cp ".;classes;lib/java-cup-11b-runtime.jar" scanner.ScannerTest
+   java -cp ".;classes;lib/java-cup-11b-runtime.jar" compiler.Main
+   
