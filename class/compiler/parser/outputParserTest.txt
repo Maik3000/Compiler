@@ -1,0 +1,89 @@
+stage: parsing
+Parsing completed successfully.
+AST:
+Program: Program
+  VarDecl: entrada Type: BooleanType
+  VarDecl: numeros Type: IntType
+  MethodDecl: suma ReturnType: IntType
+    Parameters:
+      Param: valor1 Type: IntType
+      Param: valor2 Type: IntType
+    Body:
+    Block:
+      VarDecls:
+        VarDecl: res Type: IntType
+      Statements:
+        AssignStmt:
+          Location:
+            VarLocation: res
+          Operator: =
+          Expression:
+            BinaryExpr: +
+              Left:
+                VarLocation: valor1
+              Right:
+                VarLocation: valor2
+        ReturnStmt:
+          VarLocation: res
+  MethodDecl: main ReturnType: VoidType
+    Parameters:
+    Body:
+    Block:
+      VarDecls:
+        VarDecl: resultado1 Type: IntType
+        VarDecl: resultado2 Type: IntType
+        VarDecl: resultado3 Type: BooleanType
+      Statements:
+        AssignStmt:
+          Location:
+            VarLocation: entrada
+          Operator: =
+          Expression:
+            BoolLiteral: true
+        IfStmt:
+          Condition:
+            BinaryExpr: ==
+              Left:
+                VarLocation: entrada
+              Right:
+                BoolLiteral: true
+          Then Block:
+            Block:
+              VarDecls:
+              Statements:
+                AssignStmt:
+                  Location:
+                    VarLocation: resultado1
+                  Operator: =
+                  Expression:
+                    MethodCall: suma
+                      Arguments:
+                        IntLiteral: 3
+                        IntLiteral: 2
+        AssignStmt:
+          Location:
+            VarLocation: entrada
+          Operator: =
+          Expression:
+            BoolLiteral: false
+        IfStmt:
+          Condition:
+            BinaryExpr: ==
+              Left:
+                VarLocation: entrada
+              Right:
+                BoolLiteral: true
+          Then Block:
+            Block:
+              VarDecls:
+              Statements:
+                AssignStmt:
+                  Location:
+                    VarLocation: resultado1
+                  Operator: =
+                  Expression:
+                    MethodCall: resta
+                      Arguments:
+                        IntLiteral: 3
+                        IntLiteral: 2
+
