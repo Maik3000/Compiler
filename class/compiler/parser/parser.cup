@@ -156,53 +156,43 @@ statement_list ::= statement_list:sl statement:s                                
                   | /* vacío */                                                                  {: RESULT = new ArrayList<>(); :};
 
 statement ::= location:l assign_op:op expr:e SEMI
-           {: 
-               System.out.println("Debug: Creando AssignStmt");
+           {:                
                RESULT = new AssignStmt(l, op, e); 
            :}
          | method_call:mcall SEMI
-           {: 
-               System.out.println("Debug: Creando MethodCallStmt");
+           {:                
                RESULT = new MethodCallStmt(mcall); 
            :}
          | IF LPAREN expr:cond RPAREN block:then_block ELSE block:else_block
-           {: 
-               System.out.println("Debug: Creando IfStmt con else");
+           {:                
                RESULT = new IfStmt(cond, then_block, else_block); 
            :}
          | IF LPAREN expr:cond RPAREN block:then_block
-           {: 
-               System.out.println("Debug: Creando IfStmt sin else");
+           {:                
                RESULT = new IfStmt(cond, then_block, null); 
            :}
          | WHILE LPAREN expr:cond RPAREN block:body
            {: 
-               System.out.println("Debug: Creando WhileStmt");
                RESULT = new WhileStmt(cond, body); 
            :}
          | FOR LPAREN for_init_expr:init SEMI expr_opt:cond SEMI for_update_stmt:update RPAREN block:body
-           {: 
-               System.out.println("Debug: Creando ForStmt");
+           {:               
                RESULT = new ForStmt(init, cond, update, body); 
            :}
          | RETURN expr_opt:eopt SEMI
-           {: 
-               System.out.println("Debug: Creando ReturnStmt");
+           {:                
                RESULT = new ReturnStmt(eopt); 
            :}
          | BREAK SEMI
            {: 
-               System.out.println("Debug: Creando BreakStmt");
                RESULT = new BreakStmt(); 
            :}
          | CONTINUE SEMI
            {: 
-               System.out.println("Debug: Creando ContinueStmt");
                RESULT = new ContinueStmt(); 
            :}
          | block:b
            {: 
-               System.out.println("Debug: Creando Block");
                RESULT = b; 
            :}
          ;
@@ -226,17 +216,14 @@ expr_opt ::= expr:e
 
 for_update_stmt ::= assign_expr:aexpr
                    {: 
-                       System.out.println("Debug: Creando ExprStmt para for_update_stmt");
                        RESULT = new ExprStmt(aexpr); 
                    :}
                  | expr:e
                    {: 
-                       System.out.println("Debug: Creando ExprStmt para for_update_stmt con expr:e");
                        RESULT = new ExprStmt(e); 
                    :}
                  | /* vacío */
                    {: 
-                       System.out.println("Debug: Creando for_update_stmt como null");
                        RESULT = null; 
                    :}
                  ;
@@ -261,12 +248,10 @@ location ::= ID:id
 
 method_call ::= method_name:name LPAREN expr_plus_list_opt:args RPAREN
              {: 
-                 System.out.println("Debug: Creando MethodCall");
                  RESULT = new MethodCall(name, args); 
              :}
            | CALLOUT LPAREN STRING_LITERAL:str opt_comma_callout_arg_list:args RPAREN
              {: 
-                 System.out.println("Debug: Creando CalloutCall");
                  RESULT = new CalloutCall((String) str, args); 
              :}
            ;
