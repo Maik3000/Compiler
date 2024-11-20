@@ -8,64 +8,58 @@ package compiler.parser;
 /** CUP generated interface containing symbol constants. */
 public interface sym {
   /* terminals */
-  public static final int DIVIDE = 24;
-  public static final int STRING_LITERAL = 45;
-  public static final int LBRACKET = 40;
-  public static final int CHAR = 8;
-  public static final int CHAR_LITERAL = 46;
-  public static final int GE = 31;
-  public static final int UMINUS = 43;
-  public static final int PLUS_ASSIGN = 19;
-  public static final int LPAREN = 38;
-  public static final int SEMI = 5;
-  public static final int CONTINUE = 16;
-  public static final int INT = 6;
-  public static final int FOR = 12;
-  public static final int MINUS = 22;
-  public static final int RPAREN = 39;
-  public static final int NOT = 34;
-  public static final int AND = 32;
-  public static final int LT = 28;
-  public static final int CALLOUT = 17;
-  public static final int OR = 33;
-  public static final int COMMA = 37;
+  public static final int DIVIDE = 22;
+  public static final int STRING_LITERAL = 46;
+  public static final int LBRACKET = 42;
+  public static final int CHAR = 32;
+  public static final int CHAR_LITERAL = 47;
+  public static final int GE = 29;
+  public static final int UMINUS = 16;
+  public static final int PLUS_ASSIGN = 17;
+  public static final int LPAREN = 40;
+  public static final int SEMI = 14;
+  public static final int CONTINUE = 10;
+  public static final int INT = 30;
+  public static final int FOR = 6;
+  public static final int MINUS = 20;
+  public static final int RPAREN = 41;
+  public static final int NOT = 35;
+  public static final int AND = 33;
+  public static final int LT = 26;
+  public static final int CALLOUT = 11;
+  public static final int OR = 34;
+  public static final int COMMA = 13;
   public static final int CLASS = 2;
-  public static final int PLUS = 21;
-  public static final int ASSIGN = 18;
-  public static final int IF = 10;
-  public static final int ID = 44;
-  public static final int LE = 30;
+  public static final int PLUS = 19;
+  public static final int ASSIGN = 15;
+  public static final int IF = 4;
+  public static final int ID = 45;
+  public static final int LE = 28;
   public static final int EOF = 0;
-  public static final int BOOLEAN = 7;
-  public static final int RETURN = 14;
-  public static final int RBRACKET = 41;
-  public static final int TRUE = 35;
-  public static final int NEW = 42;
+  public static final int BOOLEAN = 31;
+  public static final int RETURN = 8;
+  public static final int RBRACKET = 43;
+  public static final int TRUE = 36;
+  public static final int NEW = 12;
   public static final int error = 1;
-  public static final int MOD = 25;
-  public static final int NEQ = 27;
-  public static final int BREAK = 15;
-  public static final int VOID = 9;
-  public static final int EQ = 26;
-  public static final int TIMES = 23;
-  public static final int LBRACE = 3;
-  public static final int ELSE = 11;
-  public static final int WHILE = 13;
-  public static final int RBRACE = 4;
-  public static final int FALSE = 36;
-  public static final int GT = 29;
-  public static final int MINUS_ASSIGN = 20;
-  public static final int INT_LITERAL = 47;
+  public static final int MOD = 23;
+  public static final int NEQ = 25;
+  public static final int BREAK = 9;
+  public static final int VOID = 3;
+  public static final int EQ = 24;
+  public static final int TIMES = 21;
+  public static final int LBRACE = 38;
+  public static final int ELSE = 5;
+  public static final int WHILE = 7;
+  public static final int RBRACE = 39;
+  public static final int FALSE = 37;
+  public static final int GT = 27;
+  public static final int MINUS_ASSIGN = 18;
+  public static final int INT_LITERAL = 44;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
   "CLASS",
-  "LBRACE",
-  "RBRACE",
-  "SEMI",
-  "INT",
-  "BOOLEAN",
-  "CHAR",
   "VOID",
   "IF",
   "ELSE",
@@ -75,7 +69,11 @@ public interface sym {
   "BREAK",
   "CONTINUE",
   "CALLOUT",
+  "NEW",
+  "COMMA",
+  "SEMI",
   "ASSIGN",
+  "UMINUS",
   "PLUS_ASSIGN",
   "MINUS_ASSIGN",
   "PLUS",
@@ -89,22 +87,24 @@ public interface sym {
   "GT",
   "LE",
   "GE",
+  "INT",
+  "BOOLEAN",
+  "CHAR",
   "AND",
   "OR",
   "NOT",
   "TRUE",
   "FALSE",
-  "COMMA",
+  "LBRACE",
+  "RBRACE",
   "LPAREN",
   "RPAREN",
   "LBRACKET",
   "RBRACKET",
-  "NEW",
-  "UMINUS",
+  "INT_LITERAL",
   "ID",
   "STRING_LITERAL",
-  "CHAR_LITERAL",
-  "INT_LITERAL"
+  "CHAR_LITERAL"
   };
 }
 

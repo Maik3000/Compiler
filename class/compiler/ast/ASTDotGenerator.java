@@ -1,9 +1,9 @@
 package compiler.ast;
 
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ASTDotGenerator implements ASTVisitor {
     private final PrintWriter writer;
@@ -24,9 +24,9 @@ public class ASTDotGenerator implements ASTVisitor {
         int id = getNodeId(node);
         // Escapar caracteres especiales en el label
         label = label.replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t");
+                     .replace("\n", "\\n")
+                     .replace("\r", "\\r")
+                     .replace("\t", "\\t");
         writer.printf("    node%d [label=\"%s\"];\n", id, label);
     }
 
@@ -36,295 +36,422 @@ public class ASTDotGenerator implements ASTVisitor {
 
     public void beginGraph() {
         writer.println("digraph AST {");
-        writer.println("    node [shape=box, fontname=\"Arial\"];");
-        writer.println("    edge [fontname=\"Arial\"];");
-        writer.println("    rankdir=TB;");  // Top to bottom direction
+        
     }
 
     public void endGraph() {
         writer.println("}");
     }
 
+    // Implementación de los métodos visit para cada clase del AST:
+
     @Override
-    public void visit(Program program) {
-        createNode(program, "Program\n" + program.className);
-        for (ClassBodyMember member : program.classBody) {
-            createEdge(program, member);
+    public void visit(ProgramNode node) {
+        createNode(node, "ProgramNode\n" + node.getName());
+        for (ClassMember member : node.getBody()) {
+            createEdge(node, member);
             member.accept(this);
         }
     }
 
     @Override
-    public void visit(VarDecl varDecl) {
-        String arrayStr = varDecl.isArray ? "[]" : "";
-        createNode(varDecl, "VarDecl\n" + varDecl.name + ": " + varDecl.type.getClass().getSimpleName() + arrayStr);
-        if (varDecl.initExpr != null) {
-            createEdge(varDecl, varDecl.initExpr);
-            varDecl.initExpr.accept(this);
+    public void visit(ClassMember node) {
+        // Clase abstracta, no se implementa directamente
+    }
+
+    @Override
+    public void visit(VarDeclaration varDecl) {
+        String arrayStr = varDecl.isArray() ? "[]" : "";
+        createNode(varDecl, "VarDeclaration\n" + varDecl.getName() + arrayStr);
+        if (varDecl.getType() != null) {
+            createEdge(varDecl, varDecl.getType());
+            varDecl.getType().accept(this);
+        }
+        if (varDecl.getInitExpr() != null) {
+            createEdge(varDecl, varDecl.getInitExpr());
+            varDecl.getInitExpr().accept(this);
         }
     }
 
     @Override
-    public void visit(MethodDecl methodDecl) {
-        createNode(methodDecl, "MethodDecl\n" + methodDecl.name + "\n" + methodDecl.returnType.getClass().getSimpleName());
+    public void visit(VarDeclarationStatement node) {
+        createNode(node, "VarDeclarationStatement");
+        createEdge(node, node.getVarDeclaration());
+        node.getVarDeclaration().accept(this);
+        if (node.getInitExpression() != null) {
+            createEdge(node, node.getInitExpression());
+            node.getInitExpression().accept(this);
+        }
+    }
 
-        for (Param param : methodDecl.params) {
-            createEdge(methodDecl, param);
+    @Override
+    public void visit(MethodDeclaration node) {
+        createNode(node, "MethodDeclaration\n" + node.getName());
+        if (node.getReturnType() != null) {
+            createEdge(node, node.getReturnType());
+            node.getReturnType().accept(this);
+        }
+
+        for (Parameter param : node.getParameters()) {
+            createEdge(node, param);
             param.accept(this);
         }
 
-        createEdge(methodDecl, methodDecl.body);
-        methodDecl.body.accept(this);
+        if (node.getBody() != null) {
+            createEdge(node, node.getBody());
+            node.getBody().accept(this);
+        }
     }
 
     @Override
-    public void visit(Block block) {
-        createNode(block, "Block");
+    public void visit(MultipleVarDeclaration node) {
+        createNode(node, "MultipleVarDeclaration");
+        for (VarDeclaration decl : node.getDeclarations()) {
+            createEdge(node, decl);
+            decl.accept(this);
+        }
+    }
+    @Override
+    public void visit(StatementNode node) {
+        if (node instanceof AssignmentStatement) {
+            visit((AssignmentStatement) node);
+        } else if (node instanceof MethodCallStatement) {
+            visit((MethodCallStatement) node);
+        } else if (node instanceof IfStatement) {
+            visit((IfStatement) node);
+        } else if (node instanceof WhileStatement) {
+            visit((WhileStatement) node);
+        } else if (node instanceof ForStatement) {
+            visit((ForStatement) node);
+        } else if (node instanceof ReturnStatement) {
+            visit((ReturnStatement) node);
+        } else if (node instanceof BreakStatement) {
+            visit((BreakStatement) node);
+        } else if (node instanceof ContinueStatement) {
+            visit((ContinueStatement) node);
+        } else if (node instanceof BlockNode) {
+            visit((BlockNode) node);
+        } else if (node instanceof VarDeclarationStatement) {
+            visit((VarDeclarationStatement) node);
+        } else {
+            // Manejar otros tipos de StatementNode si los hay
+            createNode(node, "Unknown StatementNode");
+        }
+    }
 
-        for (VarDecl varDecl : block.varDecls) {
-            createEdge(block, varDecl);
+    @Override
+    public void visit(BlockNode node) {
+        createNode(node, "BlockNode");
+        for (VarDeclaration varDecl : node.getVarDeclarations()) {
+            createEdge(node, varDecl);
             varDecl.accept(this);
         }
-
-        for (Statement stmt : block.statements) {
-            createEdge(block, stmt);
+        for (StatementNode stmt : node.getStatements()) {
+            createEdge(node, stmt);
             stmt.accept(this);
         }
     }
 
+    
     @Override
-    public void visit(AssignStmt assignStmt) {
-        createNode(assignStmt, "AssignStmt\n" + assignStmt.op);
-        createEdge(assignStmt, assignStmt.location);
-        createEdge(assignStmt, assignStmt.expr);
-        assignStmt.location.accept(this);
-        assignStmt.expr.accept(this);
+    public void visit(AssignmentStatement node) {
+        createNode(node, "AssignmentStatement\nOperator: " + node.getOperator());
+        createEdge(node, node.getLocation());
+        node.getLocation().accept(this);
+        createEdge(node, node.getExpression());
+        node.getExpression().accept(this);
     }
 
     @Override
-    public void visit(MethodCallStmt methodCallStmt) {
-        createNode(methodCallStmt, "MethodCallStmt");
-        createEdge(methodCallStmt, methodCallStmt.getMethodCall());
-        methodCallStmt.getMethodCall().accept(this);
+    public void visit(MethodCallStatement node) {
+        createNode(node, "MethodCallStatement");
+        createEdge(node, node.getMethodCall());
+        node.getMethodCall().accept(this);
     }
 
     @Override
-    public void visit(IfStmt ifStmt) {
-        createNode(ifStmt, "IfStmt");
-        createEdge(ifStmt, ifStmt.getCondition());
-        ifStmt.getCondition().accept(this);
-
-        if (ifStmt.getThenBlock() != null) {
-            createEdge(ifStmt, ifStmt.getThenBlock());
-            ifStmt.getThenBlock().accept(this);
-        }
-
-        if (ifStmt.getElseBlock() != null) {
-            createEdge(ifStmt, ifStmt.getElseBlock());
-            ifStmt.getElseBlock().accept(this);
-        }
+    public void visit(ExpressionStatement node) {
+        createNode(node, "ExpressionStatement");
+        createEdge(node, node.getExpression());
+        node.getExpression().accept(this);
     }
 
     @Override
-    public void visit(WhileStmt whileStmt) {
-        createNode(whileStmt, "WhileStmt");
-        createEdge(whileStmt, whileStmt.getCondition());
-        whileStmt.getCondition().accept(this);
-        createEdge(whileStmt, whileStmt.getBody());
-        whileStmt.getBody().accept(this);
-    }
-
-    @Override
-    public void visit(ForStmt forStmt) {
-        createNode(forStmt, "ForStmt");
-        if (forStmt.getInit() != null) {
-            createEdge(forStmt, forStmt.getInit());
-            forStmt.getInit().accept(this);
-        }
-        if (forStmt.getCondition() != null) {
-            createEdge(forStmt, forStmt.getCondition());
-            forStmt.getCondition().accept(this);
-        }
-        if (forStmt.getUpdate() != null) {
-            createEdge(forStmt, forStmt.getUpdate());
-            forStmt.getUpdate().accept(this);
-        }
-        createEdge(forStmt, forStmt.getBody());
-        forStmt.getBody().accept(this);
-    }
-
-    @Override
-    public void visit(ReturnStmt returnStmt) {
-        createNode(returnStmt, "ReturnStmt");
-        if (returnStmt.getExpression() != null) {
-            createEdge(returnStmt, returnStmt.getExpression());
-            returnStmt.getExpression().accept(this);
+    public void visit(IfStatement node) {
+        createNode(node, "IfStatement");
+        createEdge(node, node.getCondition());
+        node.getCondition().accept(this);
+        createEdge(node, node.getThenBlock());
+        node.getThenBlock().accept(this);
+        if (node.getElseBlock() != null) {
+            createEdge(node, node.getElseBlock());
+            node.getElseBlock().accept(this);
         }
     }
 
     @Override
-    public void visit(BreakStmt breakStmt) {
-        createNode(breakStmt, "BreakStmt");
+    public void visit(WhileStatement node) {
+        createNode(node, "WhileStatement");
+        createEdge(node, node.getCondition());
+        node.getCondition().accept(this);
+        createEdge(node, node.getBody());
+        node.getBody().accept(this);
     }
 
     @Override
-    public void visit(ContinueStmt continueStmt) {
-        createNode(continueStmt, "ContinueStmt");
+    public void visit(ForStatement node) {
+        createNode(node, "ForStatement");
+        if (node.getInitExpr() != null) {
+            createEdge(node, node.getInitExpr());
+            node.getInitExpr().accept(this);
+        }
+        if (node.getCondition() != null) {
+            createEdge(node, node.getCondition());
+            node.getCondition().accept(this);
+        }
+        if (node.getUpdateStmt() != null) {
+            createEdge(node, node.getUpdateStmt());
+            node.getUpdateStmt().accept(this);
+        }
+        createEdge(node, node.getBody());
+        node.getBody().accept(this);
     }
 
     @Override
-    public void visit(ExprStmt exprStmt) {
-        createNode(exprStmt, "ExprStmt");
-        createEdge(exprStmt, exprStmt.getExpression());
-        exprStmt.getExpression().accept(this);
-    }
-
-    @Override
-    public void visit(VarDeclStmt varDeclStmt) {
-        createNode(varDeclStmt, "VarDeclStmt");
-        createEdge(varDeclStmt, varDeclStmt.getVarDecl());
-        varDeclStmt.getVarDecl().accept(this);
-        if (varDeclStmt.getInitExpression() != null) {
-            createEdge(varDeclStmt, varDeclStmt.getInitExpression());
-            varDeclStmt.getInitExpression().accept(this);
+    public void visit(ReturnStatement node) {
+        createNode(node, "ReturnStatement");
+        if (node.getExpression() != null) {
+            createEdge(node, node.getExpression());
+            node.getExpression().accept(this);
         }
     }
 
     @Override
-    public void visit(AssignExpr assignExpr) {
-        createNode(assignExpr, "AssignExpr\n" + assignExpr.getOperator());
-        createEdge(assignExpr, assignExpr.getLocation());
-        createEdge(assignExpr, assignExpr.getExpression());
-        assignExpr.getLocation().accept(this);
-        assignExpr.getExpression().accept(this);
+    public void visit(BreakStatement node) {
+        createNode(node, "BreakStatement");
     }
 
     @Override
-    public void visit(MethodCall methodCall) {
-        createNode(methodCall, "MethodCall\n" + methodCall.getMethodName());
-        for (Expression arg : methodCall.getArguments()) {
-            createEdge(methodCall, arg);
+    public void visit(ContinueStatement node) {
+        createNode(node, "ContinueStatement");
+    }
+
+    @Override
+    public void visit(ExpressionNode node) {
+        if (node instanceof AssignmentExpression) {
+            visit((AssignmentExpression) node);
+        } else if (node instanceof BinaryExpression) {
+            visit((BinaryExpression) node);
+        } else if (node instanceof UnaryExpression) {
+            visit((UnaryExpression) node);
+        } else if (node instanceof MethodCallNode) {
+            visit((MethodCallNode) node);
+        } else if (node instanceof LiteralNode) {
+            visit((LiteralNode) node);
+        } else if (node instanceof VariableLocation) {
+            visit((VariableLocation) node);
+        } else if (node instanceof ArrayLocation) {
+            visit((ArrayLocation) node);
+        } else if (node instanceof NewArrayExpression) {
+            visit((NewArrayExpression) node);
+        } else {
+            createNode(node, "Unknown ExpressionNode");
+        }
+    }
+    
+    @Override
+    public void visit(AssignmentExpression node) {
+        createNode(node, "AssignmentExpression\nOperator: " + node.getOperator());
+        createEdge(node, node.getLocation());
+        node.getLocation().accept(this);
+        createEdge(node, node.getExpression());
+        node.getExpression().accept(this);
+    }
+
+    @Override
+    public void visit(BinaryExpression node) {
+        createNode(node, "BinaryExpression\nOperator: " + node.getOperator());
+        createEdge(node, node.getLeft());
+        node.getLeft().accept(this);
+        createEdge(node, node.getRight());
+        node.getRight().accept(this);
+    }
+
+    @Override
+    public void visit(UnaryExpression node) {
+        createNode(node, "UnaryExpression\nOperator: " + node.getOperator());
+        createEdge(node, node.getExpression());
+        node.getExpression().accept(this);
+    }
+
+    @Override
+    public void visit(NewArrayExpression node) {
+        createNode(node, "NewArrayExpression");
+        createEdge(node, node.getType());
+        node.getType().accept(this);
+        createEdge(node, node.getSize());
+        node.getSize().accept(this);
+    }
+
+    @Override
+    public void visit(VariableLocation node) {
+        createNode(node, "VariableLocation\n" + node.getName());
+    }
+
+    @Override
+    public void visit(LocationNode node) {
+        if (node instanceof VariableLocation) {
+            visit((VariableLocation) node);
+        } else if (node instanceof ArrayLocation) {
+            visit((ArrayLocation) node);
+        } else {
+            // Manejar otros tipos de LocationNode si existen
+            createNode(node, "Unknown LocationNode");
+        }
+    }
+
+    @Override
+    public void visit(ArrayLocation node) {
+        createNode(node, "ArrayLocation\n" + node.getName());
+        createEdge(node, node.getIndex());
+        node.getIndex().accept(this);
+    }
+
+    @Override
+    public void visit(MethodCallNode node) {
+        if (node instanceof NormalMethodCallNode) {
+            visit((NormalMethodCallNode) node);
+        } else if (node instanceof CalloutCallNode) {
+            visit((CalloutCallNode) node);
+        } else {
+            createNode(node, "Unknown MethodCallNode");
+        }
+    }
+
+    @Override
+    public void visit(NormalMethodCallNode node) {
+        createNode(node, "NormalMethodCall\n" + node.getMethodName());
+        for (ExpressionNode arg : node.getArguments()) {
+            createEdge(node, arg);
             arg.accept(this);
         }
     }
 
     @Override
-    public void visit(CalloutStmt calloutStmt) {
-        createNode(calloutStmt, "CalloutStmt");
-        createEdge(calloutStmt, calloutStmt.getCalloutCall());
-        calloutStmt.getCalloutCall().accept(this);
-    }
-
-    @Override
-    public void visit(CalloutCall calloutCall) {
-        createNode(calloutCall, "CalloutCall\n" + calloutCall.getFunctionName());
-        for (CalloutArg arg : calloutCall.getCalloutArguments()) {
-            createEdge(calloutCall, arg);
+    public void visit(CalloutCallNode node) {
+        createNode(node, "CalloutCall\n" + node.getFunctionName());
+        for (CalloutArgument arg : node.getArguments()) {
+            createEdge(node, arg);
             arg.accept(this);
         }
     }
 
     @Override
-    public void visit(NewArrayExpr newArrayExpr) {
-        createNode(newArrayExpr, "NewArrayExpr");
-        createEdge(newArrayExpr, newArrayExpr.getType());
-        newArrayExpr.getType().accept(this);
-        createEdge(newArrayExpr, newArrayExpr.getSize());
-        newArrayExpr.getSize().accept(this);
-    }
-
-    @Override
-    public void visit(BinaryExpr binaryExpr) {
-        createNode(binaryExpr, "BinaryExpr\n" + binaryExpr.op);
-        createEdge(binaryExpr, binaryExpr.left);
-        createEdge(binaryExpr, binaryExpr.right);
-        binaryExpr.left.accept(this);
-        binaryExpr.right.accept(this);
-    }
-
-    @Override
-    public void visit(UnaryExpr unaryExpr) {
-        createNode(unaryExpr, "UnaryExpr\n" + unaryExpr.op);
-        createEdge(unaryExpr, unaryExpr.expr);
-        unaryExpr.expr.accept(this);
-    }
-
-    @Override
-    public void visit(IntLiteral intLiteral) {
-        createNode(intLiteral, "IntLiteral\n" + intLiteral.value);
-    }
-
-    @Override
-    public void visit(BoolLiteral boolLiteral) {
-        createNode(boolLiteral, "BoolLiteral\n" + boolLiteral.value);
-    }
-
-    @Override
-    public void visit(CharLiteral charLiteral) {
-        createNode(charLiteral, "CharLiteral\n'" + charLiteral.value + "'");
-    }
-
-    @Override
-    public void visit(StringLiteral stringLiteral) {
-        createNode(stringLiteral, "StringLiteral\n\"" + stringLiteral.getValue() + "\"");
-    }
-
-    @Override
-    public void visit(VarLocation varLocation) {
-        createNode(varLocation, "VarLocation\n" + varLocation.name);
-    }
-
-    @Override
-    public void visit(ArrayLocation arrayLocation) {
-        createNode(arrayLocation, "ArrayLocation\n" + arrayLocation.name);
-        createEdge(arrayLocation, arrayLocation.index);
-        arrayLocation.index.accept(this);
-    }
-
-    @Override
-    public void visit(IntType intType) {
-        createNode(intType, "IntType");
-    }
-
-    @Override
-    public void visit(BooleanType booleanType) {
-        createNode(booleanType, "BooleanType");
-    }
-
-    @Override
-    public void visit(CharType charType) {
-        createNode(charType, "CharType");
-    }
-
-    @Override
-    public void visit(VoidType voidType) {
-        createNode(voidType, "VoidType");
-    }
-
-    @Override
-    public void visit(Param param) {
-        String arrayStr = param.isArray ? "[]" : "";
-        createNode(param, "Param\n" + param.name + ": " + param.type.getClass().getSimpleName() + arrayStr);
-    }
-
-    @Override
-    public void visit(ExprArg exprArg) {
-        createNode(exprArg, "ExprArg");
-        createEdge(exprArg, exprArg.getExpression());
-        exprArg.getExpression().accept(this);
-    }
-
-    @Override
-    public void visit(StringArg stringArg) {
-        createNode(stringArg, "StringArg\n\"" + stringArg.getValue() + "\"");
-    }
-
-    @Override
-    public void visit(MultiVarDecl multiVarDecl) {
-        createNode(multiVarDecl, "MultiVarDecl");
-        for (ClassBodyMember decl : multiVarDecl.getDeclarations()) {
-            createEdge(multiVarDecl, decl);
-            decl.accept(this);
+    public void visit(LiteralNode node) {
+        if (node instanceof IntegerLiteral) {
+            visit((IntegerLiteral) node);
+        } else if (node instanceof BooleanLiteral) {
+            visit((BooleanLiteral) node);
+        } else if (node instanceof CharacterLiteral) {
+            visit((CharacterLiteral) node);
+        } else if (node instanceof StringLiteral) {
+            visit((StringLiteral) node);
+        } else {
+            createNode(node, "Unknown LiteralNode");
         }
+    }
+    @Override
+    public void visit(IntegerLiteral node) {
+        createNode(node, "IntegerLiteral\n" + node.getValue());
+    }
+
+    @Override
+    public void visit(CharacterLiteral node) {
+        createNode(node, "CharacterLiteral\n'" + node.getValue() + "'");
+    }
+
+    @Override
+    public void visit(BooleanLiteral node) {
+        createNode(node, "BooleanLiteral\n" + node.getValue());
+    }
+
+    @Override
+    public void visit(StringLiteral node) {
+        createNode(node, "StringLiteral\n\"" + node.getValue() + "\"");
+    }
+
+    @Override
+    public void visit(Parameter node) {
+        String arrayStr = node.isArray() ? "[]" : "";
+        createNode(node, "Parameter\n" + node.getName() + arrayStr);
+        createEdge(node, node.getType());
+        node.getType().accept(this);
+    }
+    @Override
+    public void visit(CalloutArgument node) {
+        if (node instanceof CalloutArgumentExpression) {
+            visit((CalloutArgumentExpression) node);
+        } else if (node instanceof CalloutArgumentString) {
+            visit((CalloutArgumentString) node);
+        } else {
+            // Handle any other CalloutArgument types if necessary
+            createNode(node, "Unknown CalloutArgument");
+        }
+    }
+
+
+    @Override
+    public void visit(CalloutArgumentExpression node) {
+        createNode(node, "CalloutArgumentExpression");
+        createEdge(node, node.getExpression());
+        node.getExpression().accept(this);
+    }
+
+    @Override
+    public void visit(CalloutArgumentString node) {
+        createNode(node, "CalloutArgumentString\n\"" + node.getValue() + "\"");
+    }
+
+    @Override
+    public void visit(VariableNode node) {
+        createNode(node, "VariableNode: " + node.getName());
+    // Si `VariableNode` tiene hijos, crea las aristas correspondientes.
+    
+    }
+
+    @Override
+    public void visit(DataTypeNode node) {
+        if (node instanceof IntegerTypeNode) {
+            visit((IntegerTypeNode) node);
+        } else if (node instanceof BooleanTypeNode) {
+            visit((BooleanTypeNode) node);
+        } else if (node instanceof CharacterTypeNode) {
+            visit((CharacterTypeNode) node);
+        } else if (node instanceof VoidTypeNode) {
+            visit((VoidTypeNode) node);
+        } else {
+            createNode(node, "Unknown DataTypeNode");
+        }
+    }
+
+    
+    @Override
+    public void visit(IntegerTypeNode node) {
+        createNode(node, "Type\nint");
+    }
+
+    @Override
+    public void visit(BooleanTypeNode node) {
+        createNode(node, "Type\nboolean");
+    }
+
+    @Override
+    public void visit(CharacterTypeNode node) {
+        createNode(node, "Type\nchar");
+    }
+
+    @Override
+    public void visit(VoidTypeNode node) {
+        createNode(node, "Type\nvoid");
     }
 }

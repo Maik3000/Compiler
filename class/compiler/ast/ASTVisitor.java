@@ -1,53 +1,55 @@
 package compiler.ast;
 
 public interface ASTVisitor {
-    // Clases principales
-    void visit(Program program);
-    void visit(VarDecl varDecl);
-    void visit(MethodDecl methodDecl);
-    void visit(MultiVarDecl multiVarDecl);
-    void visit(Block block);
-    void visit(Param param);
+    void visit(ProgramNode node);
+    void visit(ClassMember node);
+    void visit(VarDeclaration node);
+    void visit(MethodDeclaration node);
+    void visit(MultipleVarDeclaration node);
+    void visit(BlockNode node);
 
-    // Sentencias
-    void visit(AssignStmt assignStmt);
-    void visit(MethodCallStmt methodCallStmt);
-    void visit(IfStmt ifStmt);
-    void visit(WhileStmt whileStmt);
-    void visit(ForStmt forStmt);
-    void visit(ReturnStmt returnStmt);
-    void visit(BreakStmt breakStmt);
-    void visit(ContinueStmt continueStmt);
-    void visit(ExprStmt exprStmt);
-    void visit(VarDeclStmt varDeclStmt);
-    void visit(CalloutStmt calloutStmt);
+    void visit(ExpressionNode node);
+    void visit(ExpressionStatement node);
+    void visit(AssignmentExpression node);
+    void visit(BinaryExpression node);
+    void visit(UnaryExpression node);
+    void visit(NewArrayExpression node);
 
+    void visit(StatementNode node);
+    void visit(AssignmentStatement node);
+    void visit(MethodCallStatement node);
+    void visit(IfStatement node);
+    void visit(WhileStatement node);
+    void visit(ForStatement node);
+    void visit(ReturnStatement node);
+    void visit(BreakStatement node);
+    void visit(ContinueStatement node);
 
-    // Expresiones
-    void visit(AssignExpr assignExpr);
-    void visit(BinaryExpr binaryExpr);
-    void visit(UnaryExpr unaryExpr);
-    void visit(MethodCall methodCall);
-    void visit(CalloutCall calloutCall);
-    void visit(NewArrayExpr newArrayExpr);
+    void visit(LocationNode node);
+    void visit(VariableLocation node);
+    void visit(ArrayLocation node);
 
-    // Argumentos de callout
-    void visit(ExprArg exprArg);
-    void visit(StringArg stringArg);
+    void visit(MethodCallNode node);
+    void visit(NormalMethodCallNode node);
+    void visit(CalloutCallNode node);
+    
+    void visit(LiteralNode node);
+    void visit(StringLiteral node);
+    void visit(IntegerLiteral node);
+    void visit(CharacterLiteral node);
+    void visit(BooleanLiteral node);
 
-    // Literales
-    void visit(IntLiteral intLiteral);
-    void visit(BoolLiteral boolLiteral);
-    void visit(CharLiteral charLiteral);
-    void visit(StringLiteral stringLiteral);
+    void visit(DataTypeNode node);
+    void visit(IntegerTypeNode node);
+    void visit(BooleanTypeNode node);
+    void visit(CharacterTypeNode node);
+    void visit(VoidTypeNode node);
 
-    // Ubicaciones
-    void visit(VarLocation varLocation);
-    void visit(ArrayLocation arrayLocation);
+    void visit(Parameter node);
+    void visit(CalloutArgument node);
+    void visit(CalloutArgumentExpression node);
+    void visit(CalloutArgumentString node);
+    void visit(VarDeclarationStatement node);
+    void visit(VariableNode node);
 
-    // Tipos
-    void visit(IntType intType);
-    void visit(BooleanType booleanType);
-    void visit(CharType charType);
-    void visit(VoidType voidType);
 }

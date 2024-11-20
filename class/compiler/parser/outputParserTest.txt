@@ -2,88 +2,85 @@ stage: parsing
 Parsing completed successfully.
 AST:
 Program: Program
-  VarDecl: entrada Type: BooleanType
-  VarDecl: numeros Type: IntType
-  MethodDecl: suma ReturnType: IntType
+  VarDeclaration: entrada Type: BooleanTypeNode
+  VarDeclaration: numeros Type: IntegerTypeNode
+  MethodDeclaration: suma ReturnType: IntegerTypeNode
     Parameters:
-      Param: valor1 Type: IntType
-      Param: valor2 Type: IntType
+      Parameter: valor1 Type: IntegerTypeNode
+      Parameter: valor2 Type: IntegerTypeNode
     Body:
-    Block:
-      VarDecls:
-        VarDecl: res Type: IntType
+    BlockNode:
+      VarDeclarations:
+        VarDeclaration: res Type: IntegerTypeNode
       Statements:
-        AssignStmt:
+        AssignmentStatement:
           Location:
-            VarLocation: res
+            VariableLocation: res
           Operator: =
           Expression:
-            BinaryExpr: +
+            BinaryExpression: +
               Left:
-                VarLocation: valor1
+                VariableLocation: valor1
               Right:
-                VarLocation: valor2
-        ReturnStmt:
-          VarLocation: res
-  MethodDecl: main ReturnType: VoidType
-    Parameters:
+                VariableLocation: valor2
+        ReturnStatement:
+          VariableLocation: res
+  MethodDeclaration: main ReturnType: VoidTypeNode
     Body:
-    Block:
-      VarDecls:
-        VarDecl: resultado1 Type: IntType
-        VarDecl: resultado2 Type: IntType
-        VarDecl: resultado3 Type: BooleanType
+    BlockNode:
+      VarDeclarations:
+        VarDeclaration: resultado1 Type: IntegerTypeNode
+        VarDeclaration: resultado2 Type: IntegerTypeNode
+        VarDeclaration: resultado3 Type: BooleanTypeNode
       Statements:
-        AssignStmt:
+        AssignmentStatement:
           Location:
-            VarLocation: entrada
+            VariableLocation: entrada
           Operator: =
           Expression:
-            BoolLiteral: true
-        IfStmt:
+            BooleanLiteral: true
+        IfStatement:
           Condition:
-            BinaryExpr: ==
+            BinaryExpression: ==
               Left:
-                VarLocation: entrada
+                VariableLocation: entrada
               Right:
-                BoolLiteral: true
+                BooleanLiteral: true
           Then Block:
-            Block:
-              VarDecls:
+            BlockNode:
               Statements:
-                AssignStmt:
+                AssignmentStatement:
                   Location:
-                    VarLocation: resultado1
+                    VariableLocation: resultado1
                   Operator: =
                   Expression:
-                    MethodCall: suma
+                    NormalMethodCall: suma
                       Arguments:
-                        IntLiteral: 3
-                        IntLiteral: 2
-        AssignStmt:
+                        IntegerLiteral: 3
+                        IntegerLiteral: 2
+        AssignmentStatement:
           Location:
-            VarLocation: entrada
+            VariableLocation: entrada
           Operator: =
           Expression:
-            BoolLiteral: false
-        IfStmt:
+            BooleanLiteral: false
+        IfStatement:
           Condition:
-            BinaryExpr: ==
+            BinaryExpression: ==
               Left:
-                VarLocation: entrada
+                VariableLocation: entrada
               Right:
-                BoolLiteral: true
+                BooleanLiteral: true
           Then Block:
-            Block:
-              VarDecls:
+            BlockNode:
               Statements:
-                AssignStmt:
+                AssignmentStatement:
                   Location:
-                    VarLocation: resultado1
+                    VariableLocation: resultado1
                   Operator: =
                   Expression:
-                    MethodCall: resta
+                    NormalMethodCall: resta
                       Arguments:
-                        IntLiteral: 3
-                        IntLiteral: 2
+                        IntegerLiteral: 3
+                        IntegerLiteral: 2
 

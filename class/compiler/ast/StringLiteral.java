@@ -1,6 +1,6 @@
 package compiler.ast;
 
-public class StringLiteral extends Literal {
+public class StringLiteral extends LiteralNode {
     private String value;
 
     public StringLiteral(String value) {
@@ -12,7 +12,8 @@ public class StringLiteral extends Literal {
     }
 
     @Override
-    public void accept(ASTVisitor visitor) {
-        visitor.visit(this);
+    public void accept(ASTVisitor v) {
+        v.visit(this);
     }
 }
+

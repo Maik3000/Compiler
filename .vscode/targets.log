@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Nov 07 19:12:22 2024
+# Make data base, printed on Mon Nov 18 15:54:37 2024
 
 # Variables
 
@@ -41,7 +41,7 @@ MAKE_COMMAND := C:/ProgramData/chocolatey/lib/make/tools/install/bin/make.exe
 # automatic
 @D = $(patsubst %/,%,$(patsubst %\,%,$(dir $@)))
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_28296_ORUGCPMXKKMMKTBK
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_17428_QYKNZJKAJOLMDBOB
 # environment
 FPS_BROWSER_USER_PROFILE_STRING = Default
 # environment
@@ -57,7 +57,7 @@ IGCCSVC_DB = AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAsSk/5Wrr/EG/5eVvacLc1AQAAAACAAAAAAA
 # automatic
 %F = $(notdir $%)
 # environment
-VSCODE_CODE_CACHE_PATH = C:\Users\Mayco\AppData\Roaming\Code\CachedData\384ff7382de624fb94dbaf6da11977bba1ecd427
+VSCODE_CODE_CACHE_PATH = C:\Users\Mayco\AppData\Roaming\Code\CachedData\f1a4fb101478ce6ec82fe9627c43efbf9e98c813
 # environment
 LANG = C
 # default
@@ -93,7 +93,7 @@ MAKEFILE_LIST :=
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 28296
+VSCODE_PID = 17428
 # automatic
 ?D = $(patsubst %/,%,$(patsubst %\,%,$(dir $?)))
 # automatic
@@ -161,7 +161,7 @@ GNUMAKEFLAGS :=
 # environment
 OS = Windows_NT
 # environment
-EFC_13592 = 1
+EFC_9836 = 1
 # makefile
 .DEFAULT_GOAL := 
 # default
@@ -181,15 +181,13 @@ HOMEDRIVE = C:
 # environment
 PROCESSOR_ARCHITECTURE = x86
 # environment
-VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
-# environment
 COMMONPROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
 TEMP = C:\Users\Mayco\AppData\Local\Temp
 # environment
-VSCODE_IPC_HOOK = \\.\pipe\cc5e89d2-1.94.2-main-sock
+VSCODE_IPC_HOOK = \\.\pipe\cc5e89d2-1.95.3-main-sock
 # default
 .RECIPEPREFIX := 
 # automatic
@@ -209,6 +207,8 @@ ELECTRON_NO_ATTACH_CONSOLE = 1
 # environment
 PROCESSOR_REVISION = 8c02
 # environment
+VSCODE_ESM_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
 PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 140 Stepping 2, GenuineIntel
 # variable set hash-table stats:
 # Load=99/1024=10%, Rehash=0, Collisions=9/124=7%
@@ -219,7 +219,7 @@ PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 140 Stepping 2, GenuineIntel
 
 # Directories
 
-# . (key c:/Users/Mayco/Desktop/semestre 8/Compiladores/Compiler, mtime 1728439578): 5 files, no impossibilities.
+# . (key c:/Users/Mayco/Desktop/semestre 8/Compiladores/Compiler, mtime 1731466844): 5 files, no impossibilities.
 
 # 5 files, no impossibilities in 1 directories.
 
@@ -278,12 +278,12 @@ GNUmakefile:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 12 / storage = 93 B / avg = 7 B
-# current buf: size = 8174 B / used = 93 B / count = 12 / avg = 7 B
+# strcache buffers: 1 (0) / strings = 12 / storage = 90 B / avg = 7 B
+# current buf: size = 8174 B / used = 90 B / count = 12 / avg = 7 B
 
 # strcache performance: lookups = 15 / hit rate = 20%
 # hash-table stats:
 # Load=12/8192=0%, Rehash=0, Collisions=0/15=0%
-# Finished Make data base on Thu Nov 07 19:12:22 2024
+# Finished Make data base on Mon Nov 18 15:54:37 2024
 
  

@@ -11,7 +11,7 @@ import java.lang.reflect.Field;
 import compiler.scanner.Scanner;
 import compiler.parser.sym;
 import compiler.parser.Parser;
-import compiler.ast.Program;
+import compiler.ast.ProgramNode;
 import compiler.ast.ASTPrinter;
 import compiler.ast.ASTDotGenerator;
 import java_cup.runtime.Symbol;
@@ -192,7 +192,7 @@ public class Compiler {
             }
 
             // Obtener el nodo raíz del AST
-            Program program = (Program) result.value;
+            ProgramNode program = (ProgramNode) result.value;
 
             // Confirmar que el parsing fue exitoso
             writer.println("Parsing completed successfully.");
@@ -242,7 +242,7 @@ public class Compiler {
             Symbol result = parser.parse();
 
             if (result != null && result.value != null) {
-                Program program = (Program) result.value;
+                ProgramNode program = (ProgramNode) result.value;
 
                 // Crear el generador DOT
                 ASTDotGenerator dotGenerator = new ASTDotGenerator(writer);

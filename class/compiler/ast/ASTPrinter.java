@@ -1,7 +1,7 @@
 package compiler.ast;
 
 import java.io.PrintWriter;
-import java.util.List;
+
 
 public class ASTPrinter implements ASTVisitor {
     private PrintWriter writer;
@@ -27,90 +27,121 @@ public class ASTPrinter implements ASTVisitor {
     }
 
     @Override
-    public void visit(Program program) {
-        println("Program: " + program.className);
-        System.out.println("Visiting Program");
+    public void visit(ProgramNode program) {
+        println("Program: " + program.getName());
         indent();
-        for (ClassBodyMember member : program.classBody) {
+        for (ClassMember member : program.getBody()) {
             member.accept(this);
         }
         unindent();
     }
 
     @Override
-    public void visit(VarDecl varDecl) {
-        println("VarDecl: " + varDecl.name + " Type: " + varDecl.type.getClass().getSimpleName() + (varDecl.isArray ? "[]" : ""));
-        if (varDecl.initExpr != null) {
+    public void visit(VarDeclaration varDecl) {
+        String arrayStr = varDecl.isArray() ? "[]" : "";
+        println("VarDeclaration: " + varDecl.getName() + " Type: " + varDecl.getType().getClass().getSimpleName() + arrayStr);
+        if (varDecl.getInitExpr() != null) {
             indent();
             println("InitExpr:");
             indent();
-            varDecl.initExpr.accept(this);
+            varDecl.getInitExpr().accept(this);
             unindent();
             unindent();
         }
     }
 
     @Override
-    public void visit(MethodDecl methodDecl) {
-        println("MethodDecl: " + methodDecl.name + " ReturnType: " + methodDecl.returnType.getClass().getSimpleName());
+    public void visit(MethodDeclaration methodDecl) {
+        println("MethodDeclaration: " + methodDecl.getName() + " ReturnType: " + methodDecl.getReturnType().getClass().getSimpleName());
         indent();
-        println("Parameters:");
-        indent();
-        for (Param param : methodDecl.params) {
-            println("Param: " + param.name + " Type: " + param.type.getClass().getSimpleName() + (param.isArray ? "[]" : ""));
+        if (!methodDecl.getParameters().isEmpty()) {
+            println("Parameters:");
+            indent();
+            for (Parameter param : methodDecl.getParameters()) {
+                println("Parameter: " + param.getName() + " Type: " + param.getType().getClass().getSimpleName() + (param.isArray() ? "[]" : ""));
+            }
+            unindent();
         }
-        unindent();
         println("Body:");
-        methodDecl.body.accept(this);
+        methodDecl.getBody().accept(this);
         unindent();
     }
 
     @Override
-    public void visit(Block block) {
-        println("Block:");
-        indent();
-        println("VarDecls:");
-        indent();
-        for (VarDecl varDecl : block.varDecls) {
-            varDecl.accept(this);
+    public void visit(StatementNode node) {
+        if (node instanceof AssignmentStatement) {
+            visit((AssignmentStatement) node);
+        } else if (node instanceof MethodCallStatement) {
+            visit((MethodCallStatement) node);
+        } else if (node instanceof IfStatement) {
+            visit((IfStatement) node);
+        } else if (node instanceof WhileStatement) {
+            visit((WhileStatement) node);
+        } else if (node instanceof ForStatement) {
+            visit((ForStatement) node);
+        } else if (node instanceof ReturnStatement) {
+            visit((ReturnStatement) node);
+        } else if (node instanceof BreakStatement) {
+            visit((BreakStatement) node);
+        } else if (node instanceof ContinueStatement) {
+            visit((ContinueStatement) node);
+        } else if (node instanceof BlockNode) {
+            visit((BlockNode) node);
+        } else {
+            println("Unknown StatementNode");
         }
-        unindent();
-        println("Statements:");
+    }
+
+    @Override
+    public void visit(BlockNode block) {
+        println("BlockNode:");
         indent();
-        for (Statement stmt : block.statements) {
-            stmt.accept(this);
+        if (!block.getVarDeclarations().isEmpty()) {
+            println("VarDeclarations:");
+            indent();
+            for (VarDeclaration varDecl : block.getVarDeclarations()) {
+                varDecl.accept(this);
+            }
+            unindent();
         }
-        unindent();
+        if (!block.getStatements().isEmpty()) {
+            println("Statements:");
+            indent();
+            for (StatementNode stmt : block.getStatements()) {
+                stmt.accept(this);
+            }
+            unindent();
+        }
         unindent();
     }
 
     @Override
-    public void visit(AssignStmt assignStmt) {
-        println("AssignStmt:");
+    public void visit(AssignmentStatement assignStmt) {
+        println("AssignmentStatement:");
         indent();
         println("Location:");
         indent();
-        assignStmt.location.accept(this);
+        assignStmt.getLocation().accept(this);
         unindent();
-        println("Operator: " + assignStmt.op);
+        println("Operator: " + assignStmt.getOperator());
         println("Expression:");
         indent();
-        assignStmt.expr.accept(this);
+        assignStmt.getExpression().accept(this);
         unindent();
         unindent();
     }
 
     @Override
-    public void visit(MethodCallStmt methodCallStmt) {
-        println("MethodCallStmt:");
+    public void visit(MethodCallStatement methodCallStmt) {
+        println("MethodCallStatement:");
         indent();
         methodCallStmt.getMethodCall().accept(this);
         unindent();
     }
 
     @Override
-    public void visit(IfStmt ifStmt) {
-        println("IfStmt:");
+    public void visit(IfStatement ifStmt) {
+        println("IfStatement:");
         indent();
         println("Condition:");
         indent();
@@ -118,13 +149,13 @@ public class ASTPrinter implements ASTVisitor {
         unindent();
         println("Then Block:");
         indent();
-        if (ifStmt.getThenBlock() != null) { // Corrección aquí: Añadido 'if ('
+        if (ifStmt.getThenBlock() != null) {
             ifStmt.getThenBlock().accept(this);
         } else {
             println("None");
         }
         unindent();
-        if (ifStmt.getElseBlock() != null) { // Añadido 'if' para el else
+        if (ifStmt.getElseBlock() != null) {
             println("Else Block:");
             indent();
             ifStmt.getElseBlock().accept(this);
@@ -134,8 +165,8 @@ public class ASTPrinter implements ASTVisitor {
     }
 
     @Override
-    public void visit(WhileStmt whileStmt) {
-        println("WhileStmt:");
+    public void visit(WhileStatement whileStmt) {
+        println("WhileStatement:");
         indent();
         println("Condition:");
         indent();
@@ -149,13 +180,13 @@ public class ASTPrinter implements ASTVisitor {
     }
 
     @Override
-    public void visit(ForStmt forStmt) {
-        println("ForStmt:");
+    public void visit(ForStatement forStmt) {
+        println("ForStatement:");
         indent();
-        if (forStmt.getInit() != null) {
+        if (forStmt.getInitExpr() != null) {
             println("Initialization:");
             indent();
-            forStmt.getInit().accept(this);
+            forStmt.getInitExpr().accept(this);
             unindent();
         }
         if (forStmt.getCondition() != null) {
@@ -164,10 +195,10 @@ public class ASTPrinter implements ASTVisitor {
             forStmt.getCondition().accept(this);
             unindent();
         }
-        if (forStmt.getUpdate() != null) {
+        if (forStmt.getUpdateStmt() != null) {
             println("Update:");
             indent();
-            forStmt.getUpdate().accept(this);
+            forStmt.getUpdateStmt().accept(this);
             unindent();
         }
         println("Body:");
@@ -178,8 +209,8 @@ public class ASTPrinter implements ASTVisitor {
     }
 
     @Override
-    public void visit(ReturnStmt returnStmt) {
-        println("ReturnStmt:");
+    public void visit(ReturnStatement returnStmt) {
+        println("ReturnStatement:");
         indent();
         if (returnStmt.getExpression() != null) {
             returnStmt.getExpression().accept(this);
@@ -190,28 +221,39 @@ public class ASTPrinter implements ASTVisitor {
     }
 
     @Override
-    public void visit(BreakStmt breakStmt) {
-        println("BreakStmt");
+    public void visit(BreakStatement breakStmt) {
+        println("BreakStatement");
     }
 
     @Override
-    public void visit(ContinueStmt continueStmt) {
-        println("ContinueStmt");
+    public void visit(ContinueStatement continueStmt) {
+        println("ContinueStatement");
     }
 
     @Override
-    public void visit(ExprStmt exprStmt) {
-        println("ExprStmt:");
+    public void visit(ExpressionStatement exprStmt) {
+        println("ExpressionStatement:");
         indent();
         exprStmt.getExpression().accept(this);
         unindent();
     }
 
     @Override
-    public void visit(VarDeclStmt varDeclStmt) {
-        println("VarDeclStmt:");
+    public void visit(ClassMember node) {
+        if (node instanceof VarDeclaration) {
+            visit((VarDeclaration) node);
+        } else if (node instanceof MethodDeclaration) {
+            visit((MethodDeclaration) node);
+        } else {
+            println("Unknown ClassMember");
+        }
+    }
+
+    @Override
+    public void visit(VarDeclarationStatement varDeclStmt) {
+        println("VarDeclarationStatement:");
         indent();
-        varDeclStmt.getVarDecl().accept(this);
+        varDeclStmt.getVarDeclaration().accept(this);
         if (varDeclStmt.getInitExpression() != null) {
             println("InitExpression:");
             indent();
@@ -222,8 +264,31 @@ public class ASTPrinter implements ASTVisitor {
     }
 
     @Override
-    public void visit(AssignExpr assignExpr) {
-        println("AssignExpr:");
+    public void visit(ExpressionNode node) {
+        if (node instanceof AssignmentExpression) {
+            visit((AssignmentExpression) node);
+        } else if (node instanceof BinaryExpression) {
+            visit((BinaryExpression) node);
+        } else if (node instanceof UnaryExpression) {
+            visit((UnaryExpression) node);
+        } else if (node instanceof MethodCallNode) {
+            visit((MethodCallNode) node);
+        } else if (node instanceof LiteralNode) {
+            visit((LiteralNode) node);
+        } else if (node instanceof VariableLocation) {
+            visit((VariableLocation) node);
+        } else if (node instanceof ArrayLocation) {
+            visit((ArrayLocation) node);
+        } else if (node instanceof NewArrayExpression) {
+            visit((NewArrayExpression) node);
+        } else {
+            println("Unknown ExpressionNode");
+        }
+    }
+
+    @Override
+    public void visit(AssignmentExpression assignExpr) {
+        println("AssignmentExpression:");
         indent();
         println("Location:");
         indent();
@@ -238,42 +303,23 @@ public class ASTPrinter implements ASTVisitor {
     }
 
     @Override
-    public void visit(MethodCall methodCall) {
-        println("MethodCall: " + methodCall.getMethodName());
-        indent();
-        println("Arguments:");
-        indent();
-        for (Expression arg : methodCall.getArguments()) {
-            arg.accept(this);
-        }
-        unindent();
-        unindent();
-    }
-
-    @Override
-    public void visit(CalloutStmt calloutStmt) {
-        println("CalloutStmt:");
-        indent();
-        calloutStmt.getCalloutCall().accept(this);
-        unindent();
-    }
-
-    @Override
-    public void visit(CalloutCall calloutCall) {
+    public void visit(CalloutCallNode calloutCall) {
         println("CalloutCall: " + calloutCall.getFunctionName());
         indent();
-        println("Arguments:");
-        indent();
-        for (CalloutArg arg : calloutCall.getCalloutArguments()) {
-            arg.accept(this);
+        if (!calloutCall.getArguments().isEmpty()) {
+            println("Arguments:");
+            indent();
+            for (CalloutArgument arg : calloutCall.getArguments()) {
+                arg.accept(this);
+            }
+            unindent();
         }
-        unindent();
         unindent();
     }
 
     @Override
-    public void visit(NewArrayExpr newArrayExpr) {
-        println("NewArrayExpr:");
+    public void visit(NewArrayExpression newArrayExpr) {
+        println("NewArrayExpression:");
         indent();
         println("Type:");
         indent();
@@ -287,41 +333,78 @@ public class ASTPrinter implements ASTVisitor {
     }
 
     @Override
-    public void visit(BinaryExpr binaryExpr) {
-        println("BinaryExpr: " + binaryExpr.op);
+    public void visit(BinaryExpression binaryExpr) {
+        println("BinaryExpression: " + binaryExpr.getOperator());
         indent();
         println("Left:");
         indent();
-        binaryExpr.left.accept(this);
+        binaryExpr.getLeft().accept(this);
         unindent();
         println("Right:");
         indent();
-        binaryExpr.right.accept(this);
+        binaryExpr.getRight().accept(this);
         unindent();
         unindent();
     }
 
     @Override
-    public void visit(UnaryExpr unaryExpr) {
-        println("UnaryExpr: " + unaryExpr.op);
+    public void visit(UnaryExpression unaryExpr) {
+        println("UnaryExpression: " + unaryExpr.getOperator());
         indent();
-        unaryExpr.expr.accept(this);
+        unaryExpr.getExpression().accept(this);
         unindent();
     }
 
     @Override
-    public void visit(IntLiteral intLiteral) {
-        println("IntLiteral: " + intLiteral.value);
+    public void visit(MethodCallNode node) {
+        if (node instanceof NormalMethodCallNode) {
+            visit((NormalMethodCallNode) node);
+        } else if (node instanceof CalloutCallNode) {
+            visit((CalloutCallNode) node);
+        } else {
+            println("Unknown MethodCallNode");
+        }
     }
 
     @Override
-    public void visit(BoolLiteral boolLiteral) {
-        println("BoolLiteral: " + boolLiteral.value);
+    public void visit(LocationNode node) {
+        if (node instanceof VariableLocation) {
+            visit((VariableLocation) node);
+        } else if (node instanceof ArrayLocation) {
+            visit((ArrayLocation) node);
+        } else {
+            println("Unknown LocationNode");
+        }
     }
 
     @Override
-    public void visit(CharLiteral charLiteral) {
-        println("CharLiteral: '" + charLiteral.value + "'");
+    public void visit(LiteralNode node) {
+        if (node instanceof IntegerLiteral) {
+            visit((IntegerLiteral) node);
+        } else if (node instanceof BooleanLiteral) {
+            visit((BooleanLiteral) node);
+        } else if (node instanceof CharacterLiteral) {
+            visit((CharacterLiteral) node);
+        } else if (node instanceof StringLiteral) {
+            visit((StringLiteral) node);
+        } else {
+            println("Unknown LiteralNode");
+        }
+    }
+
+    @Override
+    public void visit(IntegerLiteral intLiteral) {
+        println("IntegerLiteral: " + intLiteral.getValue());
+    }
+
+    @Override
+    public void visit(BooleanLiteral boolLiteral) {
+        println("BooleanLiteral: " + boolLiteral.getValue());
+    }
+
+    @Override
+    public void visit(CharacterLiteral charLiteral) {
+        println("CharacterLiteral: '" + charLiteral.getValue() + "'");
     }
 
     @Override
@@ -330,63 +413,111 @@ public class ASTPrinter implements ASTVisitor {
     }
 
     @Override
-    public void visit(VarLocation varLocation) {
-        println("VarLocation: " + varLocation.name);
+    public void visit(VariableLocation varLocation) {
+        println("VariableLocation: " + varLocation.getName());
     }
 
     @Override
     public void visit(ArrayLocation arrayLocation) {
-        println("ArrayLocation: " + arrayLocation.name);
+        println("ArrayLocation: " + arrayLocation.getName());
         indent();
         println("Index:");
         indent();
-        arrayLocation.index.accept(this);
+        arrayLocation.getIndex().accept(this);
         unindent();
         unindent();
     }
 
+    
     @Override
-    public void visit(IntType intType) {
-        println("Type: int");
+    public void visit(Parameter param) {
+        String arrayStr = param.isArray() ? "[]" : "";
+        println("Parameter: " + param.getName() + " Type: " + param.getType().getClass().getSimpleName() + arrayStr);
     }
 
     @Override
-    public void visit(BooleanType booleanType) {
-        println("Type: boolean");
+    public void visit(CalloutArgument arg) {
+        if (arg instanceof CalloutArgumentExpression) {
+            visit((CalloutArgumentExpression) arg);
+        } else if (arg instanceof CalloutArgumentString) {
+            visit((CalloutArgumentString) arg);
+        } else {
+            println("Unknown CalloutArgument type");
+        }
     }
 
     @Override
-    public void visit(CharType charType) {
-        println("Type: char");
-    }
-
-    @Override
-    public void visit(VoidType voidType) {
-        println("Type: void");
-    }
-
-    @Override
-    public void visit(Param param) {
-        println("Param: " + param.name + " Type: " + param.type.getClass().getSimpleName() + (param.isArray ? "[]" : ""));
-    }
-
-    @Override
-    public void visit(ExprArg exprArg) {
-        println("ExprArg:");
+    public void visit(CalloutArgumentExpression exprArg) {
+        println("CalloutArgumentExpression:");
         indent();
         exprArg.getExpression().accept(this);
         unindent();
     }
 
     @Override
-    public void visit(StringArg stringArg) {
-        println("StringArg: \"" + stringArg.getValue() + "\"");
+    public void visit(CalloutArgumentString stringArg) {
+        println("CalloutArgumentString: \"" + stringArg.getValue() + "\"");
     }
 
     @Override
-    public void visit(MultiVarDecl multiVarDecl) {
-        for (ClassBodyMember decl : multiVarDecl.getDeclarations()) {
+    public void visit(VariableNode node) {
+        println("VariableNode: " + node.getName());
+    }
+
+    @Override
+    public void visit(MultipleVarDeclaration multiVarDecl) {
+        for (VarDeclaration decl : multiVarDecl.getDeclarations()) {
             decl.accept(this);
         }
+    }
+    @Override
+    public void visit(NormalMethodCallNode node) {
+        println("NormalMethodCall: " + node.getMethodName());
+        indent();
+        if (!node.getArguments().isEmpty()) {
+            println("Arguments:");
+            indent();
+            for (ExpressionNode arg : node.getArguments()) {
+                arg.accept(this);
+            }
+            unindent();
+        }
+        unindent();
+    }
+
+    
+    @Override
+    public void visit(DataTypeNode node) {
+        if (node instanceof IntegerTypeNode) {
+            visit((IntegerTypeNode) node);
+        } else if (node instanceof BooleanTypeNode) {
+            visit((BooleanTypeNode) node);
+        } else if (node instanceof CharacterTypeNode) {
+            visit((CharacterTypeNode) node);
+        } else if (node instanceof VoidTypeNode) {
+            visit((VoidTypeNode) node);
+        } else {
+            println("Unknown DataTypeNode");
+        }
+    }
+
+    @Override
+    public void visit(IntegerTypeNode intType) {
+        println("Type: int");
+    }
+
+    @Override
+    public void visit(BooleanTypeNode booleanType) {
+        println("Type: boolean");
+    }
+
+    @Override
+    public void visit(CharacterTypeNode charType) {
+        println("Type: char");
+    }
+
+    @Override
+    public void visit(VoidTypeNode voidTypeNode) {
+        println("Type: void");
     }
 }

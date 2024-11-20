@@ -2,7 +2,7 @@ package compiler.parser;
 
 import compiler.scanner.Scanner;
 import compiler.parser.Parser;
-import compiler.ast.Program;
+import compiler.ast.ProgramNode;
 import compiler.ast.ASTPrinter;
 import java_cup.runtime.Symbol;
 import compiler.ast.ASTDotGenerator;
@@ -35,7 +35,7 @@ public class ParserTest {
             Symbol result = parser.parse();
 
             // Obtener el nodo raíz del AST
-            Program program = (Program) result.value;
+            ProgramNode program = (ProgramNode) result.value;
 
             // Confirmar que el parsing fue exitoso
             writer.println("Parsing completed successfully.");
