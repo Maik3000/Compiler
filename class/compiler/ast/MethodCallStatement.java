@@ -3,7 +3,8 @@ package compiler.ast;
 public class MethodCallStatement extends StatementNode {
     private MethodCallNode methodCall;
 
-    public MethodCallStatement(MethodCallNode methodCall) {
+    public MethodCallStatement(MethodCallNode methodCall, int line, int column) {
+        super(line, column);
         this.methodCall = methodCall;
     }
 

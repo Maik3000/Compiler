@@ -1,7 +1,9 @@
 package compiler.ast;
 
 public class CharacterTypeNode extends DataTypeNode {
-    public CharacterTypeNode() {}
+    public CharacterTypeNode(int line, int column) {
+        super(line, column);
+    }
 
     @Override
     public void accept(ASTVisitor v) {

@@ -4,7 +4,8 @@ public class VarDeclarationStatement extends StatementNode {
     private VarDeclaration varDeclaration;
     private ExpressionNode initExpression; // Expresión de inicialización
 
-    public VarDeclarationStatement(VarDeclaration varDeclaration, ExpressionNode initExpression) {
+    public VarDeclarationStatement(VarDeclaration varDeclaration, ExpressionNode initExpression, int line, int column) {
+        super(line, column);
         this.varDeclaration = varDeclaration;
         this.initExpression = initExpression;
     }

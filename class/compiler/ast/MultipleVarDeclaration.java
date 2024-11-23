@@ -1,10 +1,11 @@
 package compiler.ast;
 import java.util.List;
 
-public class MultipleVarDeclaration implements ClassMember {
+public class MultipleVarDeclaration extends ClassMember {
     private List<VarDeclaration> declarations;
 
-    public MultipleVarDeclaration(List<VarDeclaration> declarations) {
+    public MultipleVarDeclaration(List<VarDeclaration> declarations, int line, int column) {
+        super(line, column);
         this.declarations = declarations;
     }
 

@@ -52,4 +52,6 @@ public interface ASTVisitor {
     void visit(VarDeclarationStatement node);
     void visit(VariableNode node);
 
+    void visit(ASTNode node);
+
 }

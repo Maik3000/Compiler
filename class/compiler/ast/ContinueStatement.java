@@ -1,7 +1,9 @@
 package compiler.ast;
 
 public class ContinueStatement extends StatementNode {
-    public ContinueStatement() {}
+    public ContinueStatement(int line, int column) {
+        super(line, column);
+    }
 
     @Override
     public void accept(ASTVisitor v) {

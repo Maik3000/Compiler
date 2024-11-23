@@ -1,5 +1,11 @@
 package compiler.ast;
 
-public interface ClassMember {
-    void accept(ASTVisitor v);
+public abstract class ClassMember extends ASTNode {
+    public ClassMember(int line, int column) {
+        super(line, column);
+    }
+    @Override
+    public void accept(ASTVisitor v) {
+        v.visit(this);
+    }
 }

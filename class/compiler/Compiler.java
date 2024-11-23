@@ -14,6 +14,7 @@ import compiler.parser.Parser;
 import compiler.ast.ProgramNode;
 import compiler.ast.ASTPrinter;
 import compiler.ast.ASTDotGenerator;
+import compiler.semantic.SemanticAnalyzer;
 import java_cup.runtime.Symbol;
 
 
@@ -84,6 +85,9 @@ public class Compiler {
                     break;
                 case "dot":
                     runDot(filename, output, debug);
+                    break;
+                case "semantic":
+                    runSemantic(filename, output, debug);
                     break;
                 default:
                     System.err.println("Objetivo desconocido: " + target);
@@ -214,6 +218,8 @@ public class Compiler {
 
             // Mensaje de éxito
             System.out.println("Parsing completado exitosamente. AST generado en " + output);
+
+    
         } catch (Exception e) {
             System.err.println("Error durante el parsing: " + e.getMessage());
             if (debug) {
@@ -319,6 +325,62 @@ public class Compiler {
     }
 
     /**
+     * Método para ejecutar el análisis semántico.
+     *
+     * @param filename Archivo de entrada.
+     * @param output   Archivo de salida.
+     * @param debug    Bandera para activar el modo debug.
+     * @throws IOException Si ocurre un error de E/S.
+     */
+    private static void runSemantic(String filename, String output, boolean debug) throws IOException {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(output))) {
+            // Indicar el inicio de la etapa de análisis semántico
+            writer.println("stage: semantic analysis");
+            System.out.println("stage: semantic analysis");
+
+            // Inicializar Scanner y Parser
+            Scanner scanner = new Scanner(new FileReader(filename));
+            Parser parser = new Parser(scanner);
+            
+            // Realizar el parsing
+            Symbol result = parser.parse();
+
+            // Verificar si el parsing resultó en un AST válido
+            if (result == null || result.value == null) {
+                writer.println("Error: No se pudo generar el AST.");
+                if (debug) {
+                    System.err.println("Error: No se pudo generar el AST.");
+                }
+                return;
+            }
+
+            // Obtener el nodo raíz del AST
+            ProgramNode program = (ProgramNode) result.value;
+
+            // Realizar el análisis semántico
+            SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
+            program.accept(semanticAnalyzer);
+
+            // Verificar si hubo errores semánticos
+            if (semanticAnalyzer.hasErrors()) {
+                writer.println("Se encontraron errores semánticos:");
+                for (String error : semanticAnalyzer.getErrorMessages()) {
+                    writer.println(error);
+                }
+                System.err.println("Análisis semántico terminado con errores. Ver el archivo de salida para más detalles.");
+            } else {
+                writer.println("Análisis semántico completado exitosamente. No se encontraron errores.");
+                System.out.println("Análisis semántico completado exitosamente. No se encontraron errores.");
+            }
+        } catch (Exception e) {
+            System.err.println("Error durante el análisis semántico: " + e.getMessage());
+            if (debug) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
      * Método para imprimir la ayuda y uso del compilador.
      */
     private static void printHelp() {
@@ -326,7 +388,7 @@ public class Compiler {
         System.out.println("Uso: java -cp \".;compiler/lib/java-cup-11b-runtime.jar\" compiler/Compiler [option] <filename> -o <outname>");
         System.out.println("");
         System.out.println("Options:");
-        System.out.println("-target <stage>: scan, parse, dot.");
+        System.out.println("-target <stage>: scan, parse, dot, semantic");
         System.out.println("-debug: Activa el modo debug.");
         System.out.println("-h: Muestra esta ayuda.");
         System.out.println("");

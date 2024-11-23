@@ -1,5 +1,6 @@
 package compiler.semantic;
 
+import compiler.ast.DataTypeNode;
 import compiler.ast.*;
 
 public class Symbol {
@@ -15,6 +16,26 @@ public class Symbol {
         this.kind = kind;
     }
 
-    // Getters y setters
-    // ...
+    public String getName() {
+        return name;
+    }
+
+    public DataTypeNode getType() {
+        return type;
+    }
+
+    public boolean isArray() {
+        return isArray;
+    }
+
+    public SymbolKind getKind() {
+        return kind;
+    }
+
+
+    public enum SymbolKind {
+        VARIABLE,
+        METHOD
+        // Puedes agregar otros tipos si es necesario
+    }
 }

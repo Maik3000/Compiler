@@ -14,7 +14,7 @@ CLASSES=$(SRC:$(SRC_DIR)/%.java=$(BIN_DIR)/%.class)
 
 # compilar todos los archivos
 all: 
-	javac -cp "$(CLASSPATH)" compiler/parser/sym.java compiler/scanner/Scanner.java compiler/parser/Parser.java compiler/ast/*.java compiler/Compiler.java compiler/parser/ParserTest.java compiler/scanner/ScannerTest.java
+	javac -cp "$(CLASSPATH)" compiler/parser/sym.java compiler/scanner/Scanner.java compiler/parser/Parser.java compiler/ast/*.java compiler/Compiler.java compiler/parser/ParserTest.java compiler/scanner/ScannerTest.java compiler/semantic/*.java
 
 # Compilación de todas las clases
 Compile-all: 

@@ -1,8 +1,8 @@
 package compiler.ast;
 
 public class VariableLocation extends LocationNode {
-    public VariableLocation(String name) {
-        super(name);
+    public VariableLocation(String name, int line, int column) {
+        super(name,line,column);
     }
 
     public String getName() {

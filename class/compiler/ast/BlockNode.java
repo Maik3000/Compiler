@@ -5,7 +5,8 @@ public class BlockNode extends StatementNode{
     private List<VarDeclaration> varDeclarations;
     private List<StatementNode> statements;
 
-    public BlockNode(List<VarDeclaration> varDeclarations, List<StatementNode> statements) {
+    public BlockNode(List<VarDeclaration> varDeclarations, List<StatementNode> statements , int line, int column) {
+        super(line, column);
         this.varDeclarations = varDeclarations;
         this.statements = statements;
     }

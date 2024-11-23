@@ -4,7 +4,8 @@ public class WhileStatement extends StatementNode {
     private ExpressionNode condition;
     private BlockNode body;
 
-    public WhileStatement(ExpressionNode condition, BlockNode body) {
+    public WhileStatement(ExpressionNode condition, BlockNode body, int line, int column) {
+        super(line, column);
         this.condition = condition;
         this.body = body;
     }

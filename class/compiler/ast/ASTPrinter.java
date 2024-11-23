@@ -309,7 +309,7 @@ public class ASTPrinter implements ASTVisitor {
         if (!calloutCall.getArguments().isEmpty()) {
             println("Arguments:");
             indent();
-            for (CalloutArgument arg : calloutCall.getArguments()) {
+            for (CalloutArgument arg : calloutCall.getCalloutArguments()) {
                 arg.accept(this);
             }
             unindent();
@@ -519,5 +519,9 @@ public class ASTPrinter implements ASTVisitor {
     @Override
     public void visit(VoidTypeNode voidTypeNode) {
         println("Type: void");
+    }
+    @Override
+    public void visit(ASTNode node) {
+        // Implementación vacía o lógica necesaria
     }
 }

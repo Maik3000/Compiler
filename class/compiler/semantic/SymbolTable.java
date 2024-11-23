@@ -1,13 +1,17 @@
 package compiler.semantic;
 
-import compiler.ast.*;
+import compiler.semantic.Symbol;
+import java.util.Deque;
+import java.util.ArrayDeque;
+import java.util.Map;
+import java.util.HashMap;
 
 public class SymbolTable {
     private Deque<Map<String, Symbol>> scopes;
 
     public SymbolTable() {
         scopes = new ArrayDeque<>();
-        enterScope(); // Inicia en el ámbito global
+        enterScope(); // Iniciar con el ámbito global
     }
 
     public void enterScope() {
@@ -15,7 +19,9 @@ public class SymbolTable {
     }
 
     public void exitScope() {
-        scopes.pop();
+        if (!scopes.isEmpty()) {
+            scopes.pop();
+        }
     }
 
     public boolean declare(Symbol symbol) {
@@ -35,5 +41,13 @@ public class SymbolTable {
             }
         }
         return null; // No encontrado
+    }
+
+    public Symbol lookupInCurrentScope(String name) {
+        Map<String, Symbol> currentScope = scopes.peek();
+        if (currentScope.containsKey(name)) {
+            return currentScope.get(name);
+        }
+        return null; // No encontrado en el ámbito actual
     }
 }

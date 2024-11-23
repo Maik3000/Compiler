@@ -1,11 +1,10 @@
 package compiler.ast;
 
 public class ArrayLocation extends LocationNode {
-    private String name;
     private ExpressionNode index;
 
-    public ArrayLocation(String name, ExpressionNode index) {
-        super(name);
+    public ArrayLocation(String name, ExpressionNode index, int line, int column) {
+        super(name, line, column);
         this.index = index;
     }
 

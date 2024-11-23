@@ -3,7 +3,8 @@ package compiler.ast;
 public class CharacterLiteral extends LiteralNode {
     private char value;
 
-    public CharacterLiteral(char value) {
+    public CharacterLiteral(char value, int line, int column) {
+        super(line, column);
         this.value = value;
     }
 

@@ -4,7 +4,8 @@ public class NewArrayExpression extends ExpressionNode {
     private DataTypeNode type;
     private ExpressionNode size;
 
-    public NewArrayExpression(DataTypeNode type, ExpressionNode size) {
+    public NewArrayExpression(DataTypeNode type, ExpressionNode size, int line, int column) {
+        super(line, column);
         this.type = type;
         this.size = size;
     }

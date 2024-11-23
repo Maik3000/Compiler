@@ -5,7 +5,8 @@ public class IfStatement extends StatementNode {
     private BlockNode thenBlock;
     private BlockNode elseBlock; // Puede ser null
 
-    public IfStatement(ExpressionNode condition, BlockNode thenBlock, BlockNode elseBlock) {
+    public IfStatement(ExpressionNode condition, BlockNode thenBlock, BlockNode elseBlock, int line, int column) {
+        super(line, column);
         this.condition = condition;
         this.thenBlock = thenBlock;
         this.elseBlock = elseBlock;

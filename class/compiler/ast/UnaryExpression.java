@@ -4,7 +4,8 @@ public class UnaryExpression extends ExpressionNode {
     private String operator;
     private ExpressionNode expression;
 
-    public UnaryExpression(String operator, ExpressionNode expression) {
+    public UnaryExpression(String operator, ExpressionNode expression, int line, int column) {
+        super(line, column);
         this.operator = operator;
         this.expression = expression;
     }

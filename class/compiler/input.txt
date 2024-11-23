@@ -12,11 +12,11 @@ class Program {
         boolean resultado3;
         entrada = true;
 
-        if (entrada == true){
+        if (entrada){
             resultado1 = suma(3,2);
         }
         entrada = false;
-        if (entrada == true){
+        if (entrada){
             resultado1 = resta(3,2);
         }     
     }

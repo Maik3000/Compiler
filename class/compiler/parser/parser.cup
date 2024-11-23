@@ -90,31 +90,56 @@ start with programNode;
 
 /* Reglas de la gramática */
 
-programNode ::= CLASS ID:name LBRACE classMemberListNode:members RBRACE
-                {: RESULT = new ProgramNode(name, members); :};
+programNode ::= CLASS:c ID:name LBRACE classMemberListNode:members RBRACE
+                {:
+                    int line = cleft + 1;
+                    int column = cright + 1;
+                    RESULT = new ProgramNode(name, members, line, column);
+                :};
 
 classMemberListNode ::= classMemberListNode:members classMemberNode:member
                          {: members.add(member); RESULT = members; :}
                       | /* vacío */
                          {: RESULT = new ArrayList<>(); :};
 
-classMemberNode ::= typeNode:type idArrayListNode:variables SEMI
+classMemberNode ::= typeNode:type idArrayListNode:variables SEMI:s
                      {:
+                         int line = variables.get(0).getLine();
+                         int column = variables.get(0).getColumn();
+
                          List<VarDeclaration> members = new ArrayList<>();
                          for (VariableNode var : variables) {
-                             members.add(new VarDeclaration(type, var.getName(), var.isArray(), null));
+                             members.add(new VarDeclaration(type, var.getName(), var.isArray(), null, var.getLine(), var.getColumn()));
                          }
-                         RESULT = new MultipleVarDeclaration(members);
+                         RESULT = new MultipleVarDeclaration(members, line, column);
                      :}
-                  | VOID ID:name LPAREN paramListNode:params RPAREN blockNode:block
-                     {: RESULT = new MethodDeclaration(new VoidTypeNode(), name, params, block); :}
-                  | typeNode:type ID:name LPAREN paramListNode:params RPAREN blockNode:block
-                     {: RESULT = new MethodDeclaration(type, name, params, block); :};
 
-optionalArrayIdNode ::= ID:name
-                         {: RESULT = new VariableNode(name, false); :}
-                      | ID:name LBRACKET RBRACKET
-                         {: RESULT = new VariableNode(name, true); :};
+                  | VOID:v ID:name LPAREN paramListNode:params RPAREN blockNode:block
+                     {:
+                         int line = vleft + 1;
+                         int column = vright + 1;
+                         RESULT = new MethodDeclaration(new VoidTypeNode(line, column), name, params, block, line, column);
+                     :}
+                     
+                  | typeNode:type ID:name LPAREN paramListNode:params RPAREN blockNode:block
+                     {:
+                         int line = type.getLine();
+                         int column = type.getColumn();
+                         RESULT = new MethodDeclaration(type, name, params, block, line, column);
+                     :};
+
+optionalArrayIdNode ::= ID:id
+                         {:
+                             int line = idleft + 1;
+                             int column = idright + 1;
+                             RESULT = new VariableNode(id, false, line, column);
+                         :}
+                      | ID:id LBRACKET LBRACKET
+                         {:
+                             int line = idleft + 1;
+                             int column = idright + 1;
+                             RESULT = new VariableNode(id, true, line, column);
+                         :};
 
 assignOptNode ::= ASSIGN exprNode:expr
                    {: RESULT = expr; :}
@@ -133,11 +158,18 @@ paramListNode ::= paramListNode:params COMMA paramNode:param
                    {: RESULT = new ArrayList<>(); :};
 
 paramNode ::= typeNode:type optionalArrayIdNode:var
-               {: RESULT = new Parameter(type, var.getName(), var.isArray()); :};
+               {:
+                   int line = var.getLine();
+                   int column = var.getColumn();
+                   RESULT = new Parameter(type, var.getName(), var.isArray(), line, column);
+               :};
 
-blockNode ::= LBRACE varDeclListNode:varDecls stmtListNode:stmts RBRACE
-               {: RESULT = new BlockNode(varDecls, stmts); :};
-
+blockNode ::= LBRACE:l varDeclListNode:varDecls stmtListNode:stmts RBRACE
+                {:
+                   int line = lleft + 1;
+                   int column = lright + 1;
+                   RESULT = new BlockNode(varDecls, stmts, line, column);
+               :};
 varDeclListNode ::= varDeclListNode:varDecls varDeclNode:varDecl
                      {: varDecls.addAll(varDecl); RESULT = varDecls; :}
                   | /* vacío */
@@ -147,7 +179,9 @@ varDeclNode ::= typeNode:type idArrayListNode:variables assignOptNode:assignOpt 
                  {:
                      List<VarDeclaration> declarations = new ArrayList<>();
                      for (VariableNode var : variables) {
-                         declarations.add(new VarDeclaration(type, var.getName(), var.isArray(), assignOpt));
+                        int line = var.getLine();
+                        int column = var.getColumn();                        
+                        declarations.add(new VarDeclaration(type, var.getName(), var.isArray(), assignOpt, line, column));
                      }
                      RESULT = declarations;
                  :};
@@ -166,34 +200,98 @@ stmtListNode ::= stmtListNode:stmts stmtNode:stmt
                | /* vacío */
                   {: RESULT = new ArrayList<>(); :};
 
-stmtNode ::= locationNode:loc assignOperatorNode:op exprNode:expr SEMI
-              {: RESULT = new AssignmentStatement(loc, op, expr); :}
-           | methodCallNode:methodCall SEMI
-              {: RESULT = new MethodCallStatement(methodCall); :}
-           | IF LPAREN exprNode:cond RPAREN blockNode:thenBlock ELSE blockNode:elseBlock
-              {: RESULT = new IfStatement(cond, thenBlock, elseBlock); :}
-           | IF LPAREN exprNode:cond RPAREN blockNode:thenBlock
-              {: RESULT = new IfStatement(cond, thenBlock, null); :}
-           | WHILE LPAREN exprNode:cond RPAREN blockNode:bodyBlock
-              {: RESULT = new WhileStatement(cond, bodyBlock); :}
-           | FOR LPAREN forInitExprNode:initExpr SEMI exprOptNode:cond SEMI forUpdateStmtNode:updateStmt RPAREN blockNode:bodyBlock
-              {: RESULT = new ForStatement(initExpr, cond, updateStmt, bodyBlock); :}
-           | RETURN exprOptNode:exprOpt SEMI
-              {: RESULT = new ReturnStatement(exprOpt); :}
-           | BREAK SEMI
-              {: RESULT = new BreakStatement(); :}
-           | CONTINUE SEMI
-              {: RESULT = new ContinueStatement(); :}
+stmtNode ::= locationNode:loc assignOperatorNode:op exprNode:expr SEMI:s
+               {:
+                  int line = loc.getLine();
+                  int column = loc.getColumn();
+                  RESULT = new AssignmentStatement(loc, op, expr, line, column);
+              :}
+
+            | methodCallNode:methodCall SEMI:s
+              {:
+                  int line = methodCall.getLine();
+                  int column = methodCall.getColumn();
+                  RESULT = new MethodCallStatement(methodCall, line, column);
+              :}
+
+           | IF:i LPAREN exprNode:cond RPAREN blockNode:thenBlock ELSE:e blockNode:elseBlock
+               {:
+                  int line = ileft + 1;
+                  int column = iright + 1;
+                  RESULT = new IfStatement(cond, thenBlock, elseBlock, line, column);
+              :}
+
+           | IF:i LPAREN exprNode:cond RPAREN blockNode:thenBlock
+               {:
+                  int line = ileft + 1;
+                  int column = iright + 1;
+                  RESULT = new IfStatement(cond, thenBlock, null, line, column);
+              :}           
+              
+            | WHILE:w LPAREN exprNode:cond RPAREN blockNode:bodyBlock
+              {: 
+                  int line = wleft + 1;
+                  int column = wright + 1;
+                  RESULT = new WhileStatement(cond, bodyBlock, line, column); 
+             :}
+
+           | FOR:f LPAREN ID:id ASSIGN forInitExprNode:initExpr SEMI exprOptNode:cond SEMI forUpdateStmtNode:updateStmt RPAREN blockNode:bodyBlock
+              {:
+                  int line = fleft + 1;
+                  int column = fright + 1;
+                  String varName = id.toString(); 
+                  RESULT = new ForStatement(varName, initExpr, cond, updateStmt, bodyBlock, line, column); 
+              :}
+
+           | RETURN:r exprOptNode:exprOpt SEMI:s
+               {:
+                  int line = rleft + 1;
+                  int column = rright + 1;
+                  RESULT = new ReturnStatement(exprOpt, line, column);
+              :}
+
+           | BREAK:b SEMI:s
+               {:
+                  int line = bleft + 1;
+                  int column = bright + 1;
+                  RESULT = new BreakStatement(line, column);
+              :}      
+
+           | CONTINUE:c SEMI:s
+              {:
+                  int line = cleft + 1;
+                  int column = cright + 1;
+                  RESULT = new ContinueStatement(line, column);
+              :}           
+              
            | blockNode:block
               {: RESULT = block; :};
 
 forInitExprNode ::= typeNode:type optionalArrayIdNode:var assignOperatorNode:op exprNode:expr
                      {:
-                         VarDeclaration varDecl = new VarDeclaration(type, var.getName(), var.isArray(), null);
-                         RESULT = new VarDeclarationStatement(varDecl, expr);
+                         int line = type.getLine();
+                         int column = type.getColumn();
+                         VarDeclaration varDecl = new VarDeclaration(type, var.getName(), var.isArray(), null, line, column);
+
+                         int exprLine = type.getLine(); // O de otro símbolo relevante
+                         int exprColumn = type.getColumn();
+                         RESULT = new VarDeclarationStatement(varDecl, expr, exprLine, exprColumn);
                      :}
+
                   | assignExprNode:assignExpr
-                     {: RESULT = new ExpressionStatement(assignExpr); :}
+                     {:
+                         int line = assignExpr.getLine();
+                         int column = assignExpr.getColumn();
+                         RESULT = new ExpressionStatement(assignExpr, line, column);
+                     :}
+                  
+                  | exprNode:expr
+                     {:
+                         int line = expr.getLine();
+                         int column = expr.getColumn();
+                         RESULT = new ExpressionStatement(expr, line, column);
+                     :}
+
                   | /* vacío */
                      {: RESULT = null; :};
 
@@ -203,14 +301,28 @@ exprOptNode ::= exprNode:expr
                  {: RESULT = null; :};
 
 forUpdateStmtNode ::= assignExprNode:assignExpr
-                       {: RESULT = new ExpressionStatement(assignExpr); :}
-                    | exprNode:expr
-                       {: RESULT = new ExpressionStatement(expr); :}
+                        {:
+                            int line = assignExpr.getLine();
+                            int column = assignExpr.getColumn();
+                            RESULT = new ExpressionStatement(assignExpr, line, column);
+                        :}                    
+                        
+                        | exprNode:expr
+                        {:
+                            int line = expr.getLine();
+                            int column = expr.getColumn();
+                            RESULT = new ExpressionStatement(expr, line, column);
+                        :}
+                        
                     | /* vacío */
                        {: RESULT = null; :};
 
 assignExprNode ::= locationNode:loc assignOperatorNode:op exprNode:expr
-                    {: RESULT = new AssignmentExpression(loc, op, expr); :};
+                     {:
+                        int line = loc.getLine();
+                        int column = loc.getColumn();
+                        RESULT = new AssignmentExpression(loc, op, expr, line, column);
+                    :};
 
 assignOperatorNode ::= ASSIGN
                         {: RESULT = "="; :}
@@ -219,15 +331,33 @@ assignOperatorNode ::= ASSIGN
                      | MINUS_ASSIGN
                         {: RESULT = "-="; :};
 
-locationNode ::= ID:name
-                  {: RESULT = new VariableLocation(name); :}
-               | ID:name LBRACKET exprNode:expr RBRACKET
-                  {: RESULT = new ArrayLocation(name, expr); :};
+locationNode ::= ID:id
+                  {:
+                      int line = idleft + 1;
+                      int column = idright + 1;
+                      RESULT = new VariableLocation(id, line, column);
+                  :}
+                  
+                  | ID:id LBRACKET exprNode:expr RBRACKET
+                  {:
+                      int line = idleft + 1;
+                      int column = idright + 1;
+                      RESULT = new ArrayLocation(id, expr, line, column);
+                  :};
 
-methodCallNode ::= methodNameNode:name LPAREN exprListOptNode:args RPAREN
-                    {: RESULT = new NormalMethodCallNode(name, args); :}
-                 | CALLOUT LPAREN STRING_LITERAL:strLit calloutArgListOptNode:args RPAREN
-                    {: RESULT = new CalloutCallNode(strLit, args); :};
+methodCallNode ::= methodNameNode:name LPAREN exprListOptNode:args RPAREN:p
+                  {:
+                        int line = pleft + 1;
+                        int column = pright + 1;
+                        RESULT = new NormalMethodCallNode(name, args, line, column);
+                  :}
+
+                  | CALLOUT:c LPAREN STRING_LITERAL:strLit calloutArgListOptNode:args RPAREN:p
+                     {:
+                        int line = cleft + 1;
+                        int column = cright + 1;
+                        RESULT = new CalloutCallNode(strLit, args, line, column);
+                    :};
 
 methodNameNode ::= ID:name
                     {: RESULT = name; :};
@@ -272,13 +402,32 @@ exprNode ::= locationNode:loc
            | literalNode:lit
               {: RESULT = lit; :}
            | exprNode:leftExpr binaryOperatorNode:op exprNode:rightExpr
-              {: RESULT = new BinaryExpression(leftExpr, op, rightExpr); :}
-           | MINUS exprNode:expr
-              {: RESULT = new UnaryExpression("-", expr); :} %prec UMINUS
-           | NOT exprNode:expr
-              {: RESULT = new UnaryExpression("!", expr); :}
-           | NEW typeNode:type LBRACKET exprNode:expr RBRACKET
-              {: RESULT = new NewArrayExpression(type, expr); :}
+               {:
+                  int line = leftExpr.getLine();
+                  int column = leftExpr.getColumn();
+                  RESULT = new BinaryExpression(leftExpr, op, rightExpr, line, column);
+              :}
+
+           | MINUS:m exprNode:expr
+              {:
+                  int line = mleft + 1;
+                  int column = mright + 1;
+                  RESULT = new UnaryExpression("-", expr, line, column);
+              :} %prec UMINUS
+
+           | NOT:n exprNode:expr
+              {:
+                  int line = nleft + 1;
+                  int column = nright + 1;
+                  RESULT = new UnaryExpression("!", expr, line, column);
+              :}
+
+           | NEW:n typeNode:type LBRACKET exprNode:expr RBRACKET
+               {:
+                  int line = nleft + 1;
+                  int column = nright + 1;
+                  RESULT = new NewArrayExpression(type, expr, line, column);
+              :}           
            | LPAREN exprNode:expr RPAREN
               {: RESULT = expr; :};
 
@@ -329,21 +478,49 @@ literalNode ::= intLiteralNode:intLit
                  {: RESULT = boolLit; :};
 
 intLiteralNode ::= INT_LITERAL:value
-                    {: RESULT = new IntegerLiteral(value); :};
+                     {:
+                        int line = valueleft + 1;
+                        int column = valueright + 1;
+                        RESULT = new IntegerLiteral(value, line, column);
+                    :};
 
 charLiteralNode ::= CHAR_LITERAL:value
-                     {: RESULT = new CharacterLiteral(value.charAt(0)); :};
+                     {:
+                         int line = valueleft + 1;
+                         int column = valueright + 1;
+                         RESULT = new CharacterLiteral(value.charAt(0), line, column);
+                     :};
 
 /* Literales booleanos */
-boolLiteralNode ::= TRUE
-                     {: RESULT = new BooleanLiteral(true); :}
-                  | FALSE
-                     {: RESULT = new BooleanLiteral(false); :};
+boolLiteralNode ::= TRUE:t
+                     {:
+                         int line = tleft + 1;
+                         int column = tright + 1;
+                         RESULT = new BooleanLiteral(true, line, column);
+                     :}
+                  | FALSE:f
+                     {:
+                         int line = fleft + 1;
+                         int column = fright + 1;
+                         RESULT = new BooleanLiteral(false, line, column);
+                     :};
 
 /* Tipos de dato */
-typeNode ::= INT
-              {: RESULT = new IntegerTypeNode(); :}
-           | BOOLEAN
-              {: RESULT = new BooleanTypeNode(); :}
-           | CHAR
-              {: RESULT = new CharacterTypeNode(); :};
+typeNode ::= INT:i
+              {:
+                  int line = ileft + 1;
+                  int column = iright + 1;
+                  RESULT = new IntegerTypeNode(line, column);
+              :}
+           | BOOLEAN:b
+              {:
+                  int line = bleft + 1;
+                  int column = bright + 1;
+                  RESULT = new BooleanTypeNode(line, column);
+              :}
+           | CHAR:c
+              {:
+                  int line = cleft + 1;
+                  int column = cright + 1;
+                  RESULT = new CharacterTypeNode(line, column);
+              :};

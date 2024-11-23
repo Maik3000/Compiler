@@ -1,12 +1,13 @@
 package compiler.ast;
 
-public class VarDeclaration implements ClassMember {
+public class VarDeclaration extends ClassMember {
     private DataTypeNode type;
     private String name;
     private boolean isArray;
     private ExpressionNode initExpr; // Puede ser null
 
-    public VarDeclaration(DataTypeNode type, String name, boolean isArray, ExpressionNode initExpr) {
+    public VarDeclaration(DataTypeNode type, String name, boolean isArray, ExpressionNode initExpr, int line, int column) {
+        super(line, column);
         this.type = type;
         this.name = name;
         this.isArray = isArray;

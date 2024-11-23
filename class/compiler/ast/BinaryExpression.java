@@ -5,7 +5,8 @@ public class BinaryExpression extends ExpressionNode {
     private String operator;
     private ExpressionNode right;
 
-    public BinaryExpression(ExpressionNode left, String operator, ExpressionNode right) {
+    public BinaryExpression(ExpressionNode left, String operator, ExpressionNode right, int line, int column) {
+        super(line, column);
         this.left = left;
         this.operator = operator;
         this.right = right;

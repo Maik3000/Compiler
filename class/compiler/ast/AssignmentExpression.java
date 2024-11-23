@@ -5,7 +5,8 @@ public class AssignmentExpression extends ExpressionNode {
     private String operator;
     private ExpressionNode expression;
 
-    public AssignmentExpression(LocationNode location, String operator, ExpressionNode expression) {
+    public AssignmentExpression(LocationNode location, String operator, ExpressionNode expression, int line, int column) {
+        super(line, column);
         this.location = location;
         this.operator = operator;
         this.expression = expression;

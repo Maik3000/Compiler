@@ -2,25 +2,13 @@ package compiler.ast;
 import java.util.List;
 
 public class NormalMethodCallNode extends MethodCallNode {
-    private String methodName;
-    private List<ExpressionNode> arguments;
-
-    public NormalMethodCallNode(String methodName, List<ExpressionNode> arguments) {
-        this.methodName = methodName;
-        this.arguments = arguments;
-    }
-    
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public List<ExpressionNode> getArguments() {
-        return arguments;
+    public NormalMethodCallNode(String methodName, List<ExpressionNode> arguments, int line, int column) {
+        super(methodName, arguments, line, column);
     }
 
     @Override
-    public void accept(ASTVisitor v) {
-        v.visit(this);
+    public void accept(ASTVisitor visitor) {
+        visitor.visit(this);
     }
 
     // Getters

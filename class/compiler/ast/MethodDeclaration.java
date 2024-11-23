@@ -1,13 +1,14 @@
 package compiler.ast;
 import java.util.List;
 
-public class MethodDeclaration implements ClassMember {
+public class MethodDeclaration extends ClassMember {
     private DataTypeNode returnType;
     private String name;
     private List<Parameter> parameters;
     private BlockNode body;
 
-    public MethodDeclaration(DataTypeNode returnType, String name, List<Parameter> parameters, BlockNode body) {
+    public MethodDeclaration(DataTypeNode returnType, String name, List<Parameter> parameters, BlockNode body, int line, int column) {
+        super(line, column);
         this.returnType = returnType;
         this.name = name;
         this.parameters = parameters;

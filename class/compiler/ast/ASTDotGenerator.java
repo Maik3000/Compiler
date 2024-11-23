@@ -340,7 +340,7 @@ public class ASTDotGenerator implements ASTVisitor {
     @Override
     public void visit(CalloutCallNode node) {
         createNode(node, "CalloutCall\n" + node.getFunctionName());
-        for (CalloutArgument arg : node.getArguments()) {
+        for (CalloutArgument arg : node.getCalloutArguments()) {
             createEdge(node, arg);
             arg.accept(this);
         }
@@ -453,5 +453,10 @@ public class ASTDotGenerator implements ASTVisitor {
     @Override
     public void visit(VoidTypeNode node) {
         createNode(node, "Type\nvoid");
+    }
+
+    @Override
+    public void visit(ASTNode node) {
+        // Implementación vacía o lógica necesaria
     }
 }
