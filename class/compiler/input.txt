@@ -7,18 +7,19 @@ class Program {
         res = valor1 + valor2;
         return res;
     }
+    
     void main(){
         int resultado1, resultado2;
         boolean resultado3;
         entrada = true;
 
-        if (entrada){
+        if (entrada == true){
             resultado1 = suma(3,2);
         }
         entrada = false;
-        if (entrada){
+        if (entrada == true){
             resultado1 = resta(3,2);
-        }     
+        }
+        
     }
 }
-

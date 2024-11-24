@@ -366,6 +366,9 @@ public class Compiler {
                 writer.println("Se encontraron errores semánticos:");
                 for (String error : semanticAnalyzer.getErrorMessages()) {
                     writer.println(error);
+                    if (debug) {
+                        System.err.println(error);
+                    }
                 }
                 System.err.println("Análisis semántico terminado con errores. Ver el archivo de salida para más detalles.");
             } else {

@@ -1,2 +1,4 @@
 stage: semantic analysis
-Análisis semántico completado exitosamente. No se encontraron errores.
+Se encontraron errores semánticos:
+Error semántico en línea 18, columna 14: Asignación incompatible. Se esperaba tipo 'int', pero se encontró 'null'.
+Error semántico en línea 22, columna 14: Asignación incompatible. Se esperaba tipo 'int', pero se encontró 'null'.

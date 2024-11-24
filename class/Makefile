@@ -55,6 +55,9 @@ run-dot:
 generate-graphviz: 
 	dot -Tpdf graph.dot -o output_parse.pdf
 
+run-semantic:
+	java -cp "$(CLASSPATH)" compiler.Compiler -target semantic compiler/input.txt -o semantic.txt
+	
 # Correr la CLI
 run-CLI:
 	java -cp "$(CLASSPATH)" compiler/Compiler.java
