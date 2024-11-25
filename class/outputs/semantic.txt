@@ -1,0 +1,2 @@
+stage: semantic analysis
+Análisis semántico completado exitosamente. No se encontraron errores.

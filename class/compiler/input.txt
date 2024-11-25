@@ -17,9 +17,6 @@ class Program {
             resultado1 = suma(3,2);
         }
         entrada = false;
-        if (entrada == true){
-            resultado1 = resta(3,2);
-        }
         
     }
 }

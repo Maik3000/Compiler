@@ -39,20 +39,23 @@ public class SymbolTable {
     }
 
     public boolean addMethod(String methodName, Symbol methodSymbol) {
-        Map<String, Symbol> currentScope = scopes.peek();
-        if (currentScope.containsKey(methodName)) {
-            return false; // El método ya está declarado en este ámbito
+        // Registrar métodos siempre en el primer ámbito (global)
+        Map<String, Symbol> globalScope = scopes.getLast();
+        if (globalScope.containsKey(methodName)) {
+            return false; // El método ya está declarado
         } else {
-            currentScope.put(methodName, methodSymbol);
+            globalScope.put(methodName, methodSymbol);
             return true;
         }
     }
     public Symbol lookupMethod(String methodName) {
         Symbol symbol = lookup(methodName);
-        if (symbol != null && symbol.getKind() == Symbol.SymbolKind.METHOD) {
-            return symbol;
+        if (symbol == null) {
+            System.out.println("Método '" + methodName + "' no encontrado en ningún ámbito.");
+        } else if (symbol.getKind() != Symbol.SymbolKind.METHOD) {
+            System.out.println("El símbolo '" + methodName + "' no es un método.");
         }
-        return null; // Method not found or not a method symbol
+        return (symbol != null && symbol.getKind() == Symbol.SymbolKind.METHOD) ? symbol : null;
     }
 
     public boolean declare(Symbol symbol) {

@@ -5,7 +5,7 @@ public class AssignmentStatement extends StatementNode {
     private String operator;
     private ExpressionNode expression;
 
-    public AssignmentStatement(LocationNode location, String operator, ExpressionNode expression, int line, int column) {
+    public AssignmentStatement( LocationNode location, String operator, ExpressionNode expression, int line, int column) {
         super(line, column);
         this.location = location;
         this.operator = operator;

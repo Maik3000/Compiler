@@ -1,0 +1,29 @@
+stage: IRT analysis
+METHOD suma
+  MOVE
+    TEMP res
+    BINOP ADD
+      TEMP valor1
+      TEMP valor2
+  RETURN
+    TEMP res
+METHOD main
+  MOVE
+    TEMP entrada
+    TEMP entrada
+  CJUMP
+    BINOP EQ
+      TEMP entrada
+      TEMP entrada
+    TRUE LABEL: L0
+    FALSE LABEL: L1
+  LABEL L0
+  MOVE
+    TEMP resultado1
+    TEMP resultado1
+  JUMP L2
+  LABEL L1
+  LABEL L2
+  MOVE
+    TEMP entrada
+    TEMP entrada

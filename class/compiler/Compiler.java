@@ -16,6 +16,10 @@ import compiler.ast.ASTPrinter;
 import compiler.ast.ASTDotGenerator;
 import compiler.semantic.SemanticAnalyzer;
 import java_cup.runtime.Symbol;
+import compiler.irt.IRTTranslator;
+import compiler.irt.IRTStatement;
+import compiler.irt.IRTPrinter;
+
 
 
 public class Compiler {
@@ -88,6 +92,9 @@ public class Compiler {
                     break;
                 case "semantic":
                     runSemantic(filename, output, debug);
+                    break;
+                case "IRT":
+                    runIRT(filename, output, debug);
                     break;
                 default:
                     System.err.println("Objetivo desconocido: " + target);
@@ -383,6 +390,71 @@ public class Compiler {
         }
     }
 
+
+    private static void runIRT(String filename, String output, boolean debug) throws IOException {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(output))) {
+            // Indicar el inicio de la etapa de análisis de IRT
+            writer.println("stage: IRT analysis");
+            System.out.println("stage: IRT analysis");
+    
+            // Inicializar Scanner y Parser
+            Scanner scanner = new Scanner(new FileReader(filename));
+            Parser parser = new Parser(scanner);
+    
+            // Realizar el parsing
+            Symbol result = parser.parse();
+    
+            // Verificar si el parsing resultó en un AST válido
+            if (result == null || result.value == null) {
+                writer.println("Error: No se pudo generar el AST.");
+                if (debug) {
+                    System.err.println("Error: No se pudo generar el AST.");
+                }
+                return;
+            }
+    
+            // Obtener el nodo raíz del AST
+            ProgramNode program = (ProgramNode) result.value;
+    
+            // Realizar el análisis semántico
+            SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
+            program.accept(semanticAnalyzer);
+    
+            // Verificar si hubo errores semánticos
+            if (semanticAnalyzer.hasErrors()) {
+                writer.println("Se encontraron errores semánticos:");
+                for (String error : semanticAnalyzer.getErrorMessages()) {
+                    writer.println(error);
+                    if (debug) {
+                        System.err.println(error);
+                    }
+                }
+                System.err.println("Análisis semántico terminado con errores. Ver el archivo de salida para más detalles.");
+                return;
+            }
+    
+            // Traducir el AST a IRT
+            IRTTranslator irtTranslator = new IRTTranslator();
+            program.accept(irtTranslator);
+    
+            // Obtener el IRT
+            IRTStatement irtRoot = irtTranslator.getIRTRoot();
+    
+            // Imprimir el IRT
+            IRTPrinter irtPrinter = new IRTPrinter(writer);
+            irtRoot.accept(irtPrinter);
+    
+            System.out.println("IRT generado exitosamente en " + output);
+    
+        } catch (Exception e) {
+            System.err.println("Error durante la traducción a IRT: " + e.getMessage());
+            if (debug) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+
     /**
      * Método para imprimir la ayuda y uso del compilador.
      */
@@ -391,7 +463,7 @@ public class Compiler {
         System.out.println("Uso: java -cp \".;compiler/lib/java-cup-11b-runtime.jar\" compiler/Compiler [option] <filename> -o <outname>");
         System.out.println("");
         System.out.println("Options:");
-        System.out.println("-target <stage>: scan, parse, dot, semantic");
+        System.out.println("-target <stage>: scan, parse, dot, semantic, IRT");
         System.out.println("-debug: Activa el modo debug.");
         System.out.println("-h: Muestra esta ayuda.");
         System.out.println("");

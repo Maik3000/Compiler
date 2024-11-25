@@ -4,6 +4,7 @@ import compiler.semantic.Symbol.SymbolKind;
 
 import java.util.*;
 
+
 public class SemanticAnalyzer implements ASTVisitor {
     // Tabla de símbolos
     private SymbolTable symbolTable;
@@ -28,8 +29,10 @@ public class SemanticAnalyzer implements ASTVisitor {
 
     private boolean isTypeCompatible(DataTypeNode type1, DataTypeNode type2) {
         // Implementa la lógica para determinar si los tipos son compatibles
-        // Por ejemplo, podrías verificar si son del mismo tipo o si hay conversiones permitidas
-        return type1.equals(type2);
+        if (type1 == null || type2 == null) {
+            return false;
+        }
+            return type1.equals(type2);
     }
     
     
@@ -99,10 +102,12 @@ public class SemanticAnalyzer implements ASTVisitor {
         DataTypeNode locationType = node.getLocation().getType();
         DataTypeNode exprType = node.getExpression().getType();
 
-        // Verificar compatibilidad de tipos
-        if (!isTypeCompatible(locationType, exprType)) {
+        if (locationType == null || exprType == null) {
+            reportError("Tipos desconocidos en la asignación.", node);
+        } else if (!isTypeCompatible(locationType, exprType)) {
             reportError("Asignación incompatible. Se esperaba tipo '" + locationType + "', pero se encontró '" + exprType + "'.", node);
         }
+    
     }
 
 
@@ -369,7 +374,9 @@ public class SemanticAnalyzer implements ASTVisitor {
        // Registrar el método en la tabla de símbolos
         String methodName = node.getName();
         DataTypeNode returnType = node.getReturnType();
-        Symbol methodSymbol = new Symbol(methodName, node.getReturnType(), false, Symbol.SymbolKind.METHOD);
+        List<Parameter> parameters = node.getParameters();
+
+        Symbol methodSymbol = new Symbol(methodName, node.getReturnType(), false, Symbol.SymbolKind.METHOD, parameters);
 
         if (!symbolTable.addMethod(methodName, methodSymbol)) {
             reportError("Method '" + methodName + "' is already declared.", node);
@@ -378,26 +385,20 @@ public class SemanticAnalyzer implements ASTVisitor {
         // Iniciar un nuevo ámbito para los parámetros y variables locales
         symbolTable.enterScope();
 
-        // Registrar los parámetros del método
-        for (Parameter parameter : node.getParameters()) {
-            String paramName = parameter.getName();
-            if (!symbolTable.addVariable(paramName, parameter.getType())) {
-                reportError("El parámetro '" + paramName + "' ya ha sido declarado en este ámbito.", parameter);
-            }
-        }
+        // Registrar los parámetros en el ámbito actual
+    for (Parameter parameter : parameters) {
+        parameter.accept(this);
+    }
 
-        // Guardar el tipo de retorno actual
-        currentMethodReturnType = node.getReturnType();
+    currentMethodReturnType = returnType;
 
-        // Visitar el cuerpo del método
-        node.getBody().accept(this);
+    node.getBody().accept(this);
 
-        // Salir del ámbito
-        symbolTable.exitScope();
+    symbolTable.exitScope();
 
-        // Restaurar el tipo de retorno
-        currentMethodReturnType = null;
-    } 
+    currentMethodReturnType = null;
+}
+
     
 
     @Override
@@ -413,7 +414,34 @@ public class SemanticAnalyzer implements ASTVisitor {
 
     @Override
     public void visit(NormalMethodCallNode node) {
-        // Verificar que el método ha sido declarado
+        String methodName = node.getMethodName();
+    Symbol methodSymbol = symbolTable.lookupMethod(methodName);
+
+    if (methodSymbol == null) {
+        reportError("El método '" + methodName + "' no está declarado.", node);
+        node.setType(null);
+    } else {
+        List<ExpressionNode> arguments = node.getArguments();
+        List<Parameter> parameters = methodSymbol.getParameters();
+
+        if (arguments.size() != parameters.size()) {
+            reportError("El método '" + methodName + "' espera " + parameters.size() + " argumentos, pero se encontraron " + arguments.size() + ".", node);
+        } else {
+            for (int i = 0; i < arguments.size(); i++) {
+                ExpressionNode arg = arguments.get(i);
+                arg.accept(this);
+                DataTypeNode argType = arg.getType();
+                DataTypeNode paramType = parameters.get(i).getType();
+
+                if (!isTypeCompatible(paramType, argType)) {
+                    reportError("El argumento " + (i + 1) + " del método '" + methodName + "' debe ser de tipo '" + paramType + "', pero se encontró '" + argType + "'.", arg);
+                }
+            }
+        }
+
+        node.setType(methodSymbol.getType());
+    }
+
         
     }
 
